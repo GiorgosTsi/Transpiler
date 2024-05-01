@@ -19,7 +19,7 @@ DOUBLE_QUOTE                    "\""
 CONSTANT_STRING                 {DOUBLE_QUOTE}(([^\"\\]|\\[ntr\\"'])*){DOUBLE_QUOTE}
 
 MACRO_WS                        [ \t\r]+
-MACRO_VALUE                     ([^\n])+
+MACRO_VALUE                     ([^ \n])+
 
 %x single_line_comment
 %s macro
@@ -57,12 +57,12 @@ MACRO_VALUE                     ([^\n])+
 
 "@defmacro"                     { printf("Macro definition found\n"); BEGIN(macro); }
 <macro>{IDENTIFIER}             { printf("Macro identifier found %s\n",yytext); }
-<macro>{MACRO_VALUE}            { printf("Macro value found %s\n",yytext); }
+<macro>{MACRO_VALUE}            { printf("Macro value found %s\n",yytext); BEGIN(INITIAL); }
 
-{IDENTIFIER}                    { printf("Identifier found : %s at line: %d\n", yytext,linenum); linenum++; }
-{INTEGER}                       { printf("Integer found: %s at line: %d\n", yytext,linenum);     linenum++; }
-{REAL}                          { printf("Real found: %s at line: %d\n", yytext,linenum);     linenum++; }
-{CONSTANT_STRING}               { printf("Constant string found %s at line: %d\n", yytext,linenum); linenum++; }
+{IDENTIFIER}                    { printf("Identifier found : %s at line: %d\n", yytext,linenum); }
+{INTEGER}                       { printf("Integer found: %s at line: %d\n", yytext,linenum); }
+{REAL}                          { printf("Real found: %s at line: %d\n", yytext,linenum); }
+{CONSTANT_STRING}               { printf("Constant string found %s at line: %d\n", yytext,linenum); }
 
 
 "+"                             {}
