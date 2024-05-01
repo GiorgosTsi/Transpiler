@@ -19,21 +19,13 @@ DOUBLE_QUOTE                    "\""
 CONSTANT_STRING                 {DOUBLE_QUOTE}(([^\"\\]|\\[ntr\\"'])*){DOUBLE_QUOTE}
 
 MACRO_WS                        [ \t\r]+
-MACRO_VALUE                     {IDENTIFIER}{MACRO_WS}([^\n])+
+MACRO_VALUE                     ([^\n])+
 
 %x single_line_comment
-%x macro
+%s macro
 
 %%
 
-"@defmacro"                     { printf("Macro definition found\n"); BEGIN(macro); }
-<macro>{MACRO_VALUE}            { 
-                                  char delimeter[] = " ";
-                                  char* macros_identifier = strtok(yytext,delimeter); //get the first token
-                                  //pass NULL to get the second token
-                                  char* macros_val = strtok(NULL,delimeter);
-                                  printf("Macros id:%s , macros value:%s\n",macros_identifier,macros_val);
-                                  BEGIN(INITIAL); }
 
 "integer"                       {printf("integer keyword found\n");}
 "scalar"                        {}
@@ -62,6 +54,10 @@ MACRO_VALUE                     {IDENTIFIER}{MACRO_WS}([^\n])+
 "comp"                          {}
 "endcomp"                       {}
 "of"                            {}
+
+"@defmacro"                     { printf("Macro definition found\n"); BEGIN(macro); }
+<macro>{IDENTIFIER}             { printf("Macro identifier found %s\n",yytext); }
+<macro>{MACRO_VALUE}            { printf("Macro value found %s\n",yytext); }
 
 {IDENTIFIER}                    { printf("Identifier found : %s at line: %d\n", yytext,linenum); linenum++; }
 {INTEGER}                       { printf("Integer found: %s at line: %d\n", yytext,linenum);     linenum++; }
