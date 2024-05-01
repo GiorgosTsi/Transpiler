@@ -1,5 +1,6 @@
 %{
 #include <stdio.h>
+#include <string.h>
     int linenum = 1;
 %}
 
@@ -16,17 +17,23 @@ DOUBLE_QUOTE                    "\""
 /*COMMON_CHARS                  [^\"\\]       this excludes all the escape chars */
 
 CONSTANT_STRING                 {DOUBLE_QUOTE}(([^\"\\]|\\[ntr\\"'])*){DOUBLE_QUOTE}
-MACRO_VALUE                     ([^\"\\]|\\[ntr\\"'])*
+
+MACRO_WS                        [ \t\r]+
+MACRO_VALUE                     {IDENTIFIER}{MACRO_WS}([^\n])+
 
 %x single_line_comment
 %x macro
 
 %%
 
-"@defmacro"[ \r\t]+             { printf("Macro definition found\n"); BEGIN(macro); }
-<macro>{IDENTIFIER}[ \t\r]+     { printf("macros id:%s\n",yytext); }
-<macro>{MACRO_VALUE}            { printf("macros value:%s\n",yytext); BEGIN(INITIAL); }
-
+"@defmacro"                     { printf("Macro definition found\n"); BEGIN(macro); }
+<macro>{MACRO_VALUE}            { 
+                                  char delimeter[] = " ";
+                                  char* macros_identifier = strtok(yytext,delimeter); //get the first token
+                                  //pass NULL to get the second token
+                                  char* macros_val = strtok(NULL,delimeter);
+                                  printf("Macros id:%s , macros value:%s\n",macros_identifier,macros_val);
+                                  BEGIN(INITIAL); }
 
 "integer"                       {printf("integer keyword found\n");}
 "scalar"                        {}
@@ -104,12 +111,12 @@ MACRO_VALUE                     ([^\"\\]|\\[ntr\\"'])*
 <<EOF>>                         { return EOF; }  /*End of file*/
 .                               { printf("Unrecognized token at line %d\n",linenum); }
 
-%% 
+%%
 
 /********* CODE SECTION ***********/
 
 int main() 
 {
-  yylex();
-  return 0;
+  yylex();
+  return 0;
 }
