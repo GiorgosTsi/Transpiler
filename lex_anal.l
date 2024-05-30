@@ -1,14 +1,16 @@
 %{
-#include <stdio.h>
-#include <string.h>
-int linenum = 1;
-int macro_count = 0;
-int macro_name_exists = -1;
-char* macro_table[50]; // 50 macros max 
-char macro_table_names[50][32];
+	#include <stdio.h>
+	#include <string.h>  
+	#include "cgen.h"
+	#include "myparser.tab.h"
+	
+	int line_num = 1;
+	int macro_count = 0;
+	int macro_name_exists = -1;
+	char* macro_table[50]; // 50 macros max 
+	char macro_table_names[50][32];
    
-int macro_initialization = 0;   // 1 if macros identifier is not a keyword,else 0.
-
+	int macro_initialization = 0;   // 1 if macros identifier is not a keyword,else 0.
 
 %}
 
@@ -29,40 +31,43 @@ CONSTANT_STRING                 {DOUBLE_QUOTE}(([^\"\\]|\\[ntr\\"'])*){DOUBLE_QU
 MACRO_WS                        [ \t\r]+
 MACRO_VALUE                     ([^ \n])+
 
+/* Conditions  */
 %x single_line_comment
 %x macro_value_definition
 %s macro
 
+
 %%
 
 
-"integer"                       {printf("integer keyword found\n"); if(macro_initialization){exit(-1);}}
-"scalar"                        {}
-"str"                           {}
-"bool"                          {}
-"True"                          {}
-"False"                         {}
-"const"                         {}
-"if"                            {}
-"else"                          {}
-"endif"                         {}
-"for"                           {}
-"in"                            {}
-"endfor"                        {}
-"while"                         {}
-"endwhile"                      {}
-"break"                         {}
-"continue"                      {}
-"not"                           {}
-"and"                           {}
-"or"                            {}
-"def"                           {}
-"enddef"                        {}
-"main"                          {}
-"return"                        {}
-"comp"                          {}
-"endcomp"                       {}
-"of"                            {}
+"integer"                       {printf("integer keyword found\n"); if(macro_initialization){exit(-1);} else { return KW_INT; } }
+"scalar"                        {return KW_SCALAR;}
+"str"                           {return KW_STR;}
+"bool"                          {return KW_BOOLEAN;}
+"True"                          {return KW_TRUE;}
+"False"                         {return KW_FALSE;}
+"const"                         {return KW_CONST;}
+"if"                            {return KW_IF;}
+"else"                          {return KW_ELSE;}
+"endif"                         {return KW_ENDIF;}
+"for"                           {return KW_FOR;}
+"in"                            {return KW_IN;}
+"endfor"                        {return KW_ENDFOR;}
+"while"                         {return KW_WHILE;}
+"endwhile"                      {return KW_ENDWHILE;}
+"break"                         {return KW_BREAK;}
+"continue"                      {return KW_CONTINUE;}
+"not"                           {return KW_NOT;}
+"and"                           {return KW_AND;}
+"or"                            {return KW_OR;}
+"def"                           {return KW_DEF;}
+"enddef"                        {return KW_ENDDEF;}
+"main"                          {return KW_MAIN;}
+"return"                        {return KW_RETURN;}
+"comp"                          {return KW_COMP;}
+"endcomp"                       {return KW_ENDCOMP;}
+"of"                            {return KW_OF;}
+
 
 "@defmacro"                     { printf("Macro definition found\n"); BEGIN(macro); macro_initialization = 1; }
 <macro>{IDENTIFIER}             { printf("Macro identifier found %s\n",yytext);
@@ -97,64 +102,56 @@ MACRO_VALUE                     ([^ \n])+
                                   }
                                   BEGIN(INITIAL); }
 
-{IDENTIFIER}                    { printf("Identifier found : %s at line: %d\n", yytext,linenum); }
-{INTEGER}                       { printf("Integer found: %s at line: %d\n", yytext,linenum); }
-{REAL}                          { printf("Real found: %s at line: %d\n", yytext,linenum); }
-{CONSTANT_STRING}               { printf("Constant string found %s at line: %d\n", yytext,linenum); }
+
+{IDENTIFIER}                    { printf("Identifier found : %s at line: %d\n", yytext,line_num);		yylval.str = strdup(yytext);	return TK_IDENTIFIER; }
+{INTEGER}                       { printf("Integer found: %s at line: %d\n", yytext,line_num);			yylval.str = strdup(yytext);	return TK_INTEGER; }
+{REAL}                          { printf("Real found: %s at line: %d\n", yytext,line_num); 				yylval.str = strdup(yytext);	return TK_REAL; }
+{CONSTANT_STRING}               { printf("Constant string found %s at line: %d\n", yytext,line_num); 	yylval.str = strdup(yytext);	return TK_STRING; }
 
 
-"+"                             {}
-"-"                             {}
-"*"                             {}
-"/"                             {}
-"%"                             {}
-"**"                            {}
+"+"                             {return OP_PLUS;}
+"-"                             {return OP_MINUS;}
+"*"                             {return OP_MULT;}
+"/"                             {return OP_DIV;}
+"%"                             {return OP_MOD;}
+"**"                            {return OP_POWER;}
 
-"=="                            {}
-"!="                            {}
-"<"                             {}
-"<="                            {}
-">"                             {}
-">="                            {}
+"=="                            {return ROP_EQUALS;}
+"!="                            {return ROP_NOTEQUALS;}
+"<"                             {return ROP_LESS;}
+"<="                            {return ROP_LESSEQUALS;}
+">"                             {return ROP_GREATER;}
+">="                            {return ROP_GREATEREQUALS;}
 
-"="                             {}
-"+="                            {}
-"-+"                            {}
-"*="                            {}
-"/+"                            {}
-"%="                            {}
-":="                            {}
+"="                             {return AOP_ASSIGN;}
+"+="                            {return AOP_PLUSASSIGN;}
+"-+"                            {return AOP_MINASSIGN;}
+"*="                            {return AOP_MULASSIGN;}
+"/+"                            {return AOP_DIVASSIGN;}
+"%="                            {return AOP_MODASSIGN;}
+":="                            {return AOP_COLONASSIGN;}
 
 
-";"                             {}
-"("                             {}
-")"                             {}
-","                             {}
-"["                             {}
-"]"                             {}
-":"                             {}
-"."                             {}
+";"                             {return DEL_SMCOLON;}
+"("                             {return DEL_LPAR;}
+")"                             {return DEL_RPAR;}
+","                             {return DEL_COMMA;}
+"["                             {return DEL_LBRACKET;}
+"]"                             {return DEL_RBRACKET;}
+":"                             {return DEL_COLON;}
+"."                             {return DEL_DOT;}
+
 
 [ \r\t]+                        /* skip whitespaces,tabs and carriage returns */
-\n                              {linenum++;}
+\n                              {line_num++;}
+
 
 "--"                            { BEGIN(single_line_comment); }
 <single_line_comment>[^\n]*     /*Eat anything in the line comment */
-<single_line_comment>"\n"       { linenum++; BEGIN(INITIAL); }
+<single_line_comment>"\n"       { line_num++; BEGIN(INITIAL); }
 
 <<EOF>>                         { return EOF; }  /*End of file*/
-.                               { printf("Unrecognized token at line %d\n",linenum); }
+.                               { yyerror("lexical error: unrecognized literal '%s'\n", yytext); }
 
 %%
-
 /********* CODE SECTION ***********/
-
-int main()
-{
-  yylex();
-
-  for(int i=0 ; i<macro_count; i++)
-    free(macro_table[i]);
-  
-  return 0;
-}

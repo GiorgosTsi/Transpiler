@@ -1,1 +1,3 @@
-rm a.out lex.yy.c; flex lex_anal.l & gcc -ll lex.yy.c 
+bison -d -v -r all myparser.y
+flex lex_anal.l
+gcc -o mycomp myparser.tab.c lex.yy.c cgen.c -lfl
