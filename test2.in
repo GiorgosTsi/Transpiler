@@ -1,0 +1,13 @@
+comp Coordinates:
+	#latitude : scalar;
+	#longtitude : integer;
+	#string : str;
+	#x1 , #y1 : integer;
+endcomp;
+
+def main( ) :
+	x : integer ;
+	y : scalar ;
+	arr[5] : str;
+	p[] : bool;
+enddef;

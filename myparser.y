@@ -1,4 +1,4 @@
-%{
+	%{
 	#include <stdio.h>
 	#include <stdlib.h>
 	#include <string.h>
@@ -13,7 +13,6 @@
 %union
 {
   char* str;
-  int num;
 }
 
 // used for the semantic values of identifiers, integers , scalars and strings.
@@ -87,7 +86,7 @@
 %token DEL_RBRACKET
 %token DEL_COLON
 %token DEL_DOT
-
+%token HASH
 
 
 
@@ -97,31 +96,107 @@
 %type <str> expr
 
 // Precedence:
-//%left OP_MINUS OP_PLUS 
 
-
-%left OP_PLUS OP_MINUS 
-
+%left OP_MINUS OP_PLUS 
 %left OP_MULT OP_DIV
-
 %left OP_MOD
-
 %right OP_POWER
+
+
+
+// Non terminal symbols:
+
+%type <str> main_func
+%type <str> func_body
+%type <str> basic_data_type
+%type <str> declaration
+%type <str> identifier
+%type <str> variable_declaration
+%type <str> comp_declarations
+%type <str> comp
+%type <str> comp_body
+%type <str> comp_field
+%type <str> comp_identifiers
+
+
 
 %%
 /******************************************* RULES SECTION *******************************************/
 
 input:  
-  %empty 
-| input expr DEL_SMCOLON 
-{ 
-  if (yyerror_count == 0) {
-    puts(c_prologue);
-    printf("Expression evaluates to: %s\n", $2); 
-  }  
-}
-;
+    %empty 
+	| main_func { 
+	  if (yyerror_count == 0) {
+		puts(c_prologue);
+		printf("Expression evaluates to:\n%s\n", $1); 
+	  }  
+	}
+	| comp_declarations main_func { 
+      if (yyerror_count == 0) {
+        puts(c_prologue);
+        printf("Expression evaluates to:\n%s\n%s\n", $1, $2); 
+      }  
+    }
+  ; 
 
+
+main_func :
+	KW_DEF KW_MAIN DEL_LPAR DEL_RPAR DEL_COLON func_body KW_ENDDEF DEL_SMCOLON {$$ = template("int main () {\n%s\n}", $6);}
+
+
+func_body :
+	%empty { $$ = strdup(""); }
+	| variable_declaration func_body {$$ = template("%s\n%s", $1, $2);} 
+	;
+	
+
+/************************* Variable Declaration *************************/ 
+variable_declaration:
+	identifier DEL_COLON basic_data_type DEL_SMCOLON 								 		  { $$ = template("%s %s; ", $3, $1); }
+  | TK_IDENTIFIER DEL_LBRACKET TK_INTEGER DEL_RBRACKET DEL_COLON basic_data_type DEL_SMCOLON  { $$ = template("%s %s[%s]; ", $6, $1, $3); }
+  | TK_IDENTIFIER DEL_LBRACKET DEL_RBRACKET DEL_COLON basic_data_type DEL_SMCOLON   		  { $$ = template("%s* %s;", $5 , $1); } // pointer
+  ;
+  
+	
+basic_data_type :
+	KW_INT { $$ = template("%s", "int"); }
+	| KW_SCALAR   { $$ = template("%s", "double"); }
+	| KW_STR { $$ = template("%s", "char*"); }
+	| KW_BOOLEAN   { $$ = template("%s", "int"); }
+	;	
+
+identifier:
+	TK_IDENTIFIER  {$$ = $1;}
+	| identifier DEL_COMMA TK_IDENTIFIER {$$ = template("%s, %s", $1,$3);}
+	;
+
+/************************* Composite Types Declaration *************************/ 
+
+
+comp_declarations:
+    comp { $$ = template("%s", $1); }
+    | comp_declarations comp { $$ = template("%s\n%s", $1, $2); }
+    ;
+    
+comp:
+    KW_COMP TK_IDENTIFIER DEL_COLON comp_body KW_ENDCOMP DEL_SMCOLON { $$ = template("typedef struct %s {\n%s\n} %s;\n", $2, $4, $2); }
+    ;
+
+comp_body:
+    comp_field { $$ = $1; }
+    | comp_field comp_body { $$ = template("%s\n%s", $1, $2); }
+    ;
+
+comp_field:
+    comp_identifiers DEL_COLON basic_data_type DEL_SMCOLON { $$ = template("%s %s;", $3, $1); }
+    ;
+
+comp_identifiers:
+	HASH TK_IDENTIFIER {$$ = $2;}
+	| comp_identifiers DEL_COMMA HASH TK_IDENTIFIER {$$ = template("%s %s" , $1 , $4);}
+
+
+/************************* Expressions Declaration *************************/ 
 expr:
   TK_INTEGER { $$ = $1; }
 | TK_REAL	 { $$ = $1; }

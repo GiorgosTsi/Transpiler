@@ -40,33 +40,33 @@ MACRO_VALUE                     ([^ \n])+
 %%
 
 
-"integer"                       {printf("integer keyword found\n"); if(macro_initialization){exit(-1);} else { return KW_INT; } }
-"scalar"                        {return KW_SCALAR;}
-"str"                           {return KW_STR;}
-"bool"                          {return KW_BOOLEAN;}
-"True"                          {return KW_TRUE;}
-"False"                         {return KW_FALSE;}
-"const"                         {return KW_CONST;}
-"if"                            {return KW_IF;}
-"else"                          {return KW_ELSE;}
-"endif"                         {return KW_ENDIF;}
-"for"                           {return KW_FOR;}
-"in"                            {return KW_IN;}
-"endfor"                        {return KW_ENDFOR;}
-"while"                         {return KW_WHILE;}
-"endwhile"                      {return KW_ENDWHILE;}
-"break"                         {return KW_BREAK;}
-"continue"                      {return KW_CONTINUE;}
-"not"                           {return KW_NOT;}
-"and"                           {return KW_AND;}
-"or"                            {return KW_OR;}
-"def"                           {return KW_DEF;}
-"enddef"                        {return KW_ENDDEF;}
-"main"                          {return KW_MAIN;}
-"return"                        {return KW_RETURN;}
-"comp"                          {return KW_COMP;}
-"endcomp"                       {return KW_ENDCOMP;}
-"of"                            {return KW_OF;}
+"integer"                       {printf("TOKEN KW_INT:\t\t %s\n" ,yytext ); if(macro_initialization){exit(-1);} else { return KW_INT; } }
+"scalar"                        {printf("TOKEN KW_SCALAR:\t\t %s\n" ,yytext ); return KW_SCALAR;}
+"str"                           {printf("TOKEN KW_STR:\t\t %s\n" ,yytext ); return KW_STR;}
+"bool"                          {printf("TOKEN KW_BOOLEAN:\t\t %s\n" ,yytext ); return KW_BOOLEAN;}
+"True"                          {printf("TOKEN KW_TRUE:\t\t %s\n" ,yytext ); return KW_TRUE;}
+"False"                         {printf("TOKEN KW_FALSE:\t\t %s\n" ,yytext ); return KW_FALSE;}
+"const"                         {printf("TOKEN KW_CONST:\t\t %s\n" ,yytext ); return KW_CONST;}
+"if"                            {printf("TOKEN KW_IF:\t\t %s\n" ,yytext ); return KW_IF;}
+"else"                          {printf("TOKEN KW_ELSE:\t\t %s\n" ,yytext ); return KW_ELSE;}
+"endif"                         {printf("TOKEN KW_ENDIF:\t\t %s\n" ,yytext ); return KW_ENDIF;}
+"for"                           {printf("TOKEN KW_FOR:\t\t %s\n" ,yytext ); return KW_FOR;}
+"in"                            {printf("TOKEN KW_IN:\t\t %s\n" ,yytext ); return KW_IN;}
+"endfor"                        {printf("TOKEN KW_ENDFOR:\t\t %s\n" ,yytext ); return KW_ENDFOR;}
+"while"                         {printf("TOKEN KW_WHILE:\t\t %s\n" ,yytext ); return KW_WHILE;}
+"endwhile"                      {printf("TOKEN KW_ENDWHILE:\t\t %s\n" ,yytext ); return KW_ENDWHILE;}
+"break"                         {printf("TOKEN KW_BREAK:\t\t %s\n" ,yytext ); return KW_BREAK;}
+"continue"                      {printf("TOKEN KW_CONTINUE:\t\t %s\n" ,yytext ); return KW_CONTINUE;}
+"not"                           {printf("TOKEN KW_NOT:\t\t %s\n" ,yytext ); return KW_NOT;}
+"and"                           {printf("TOKEN KW_AND:\t\t %s\n" ,yytext ); return KW_AND;}
+"or"                            {printf("TOKEN KW_OR:\t\t %s\n" ,yytext ); return KW_OR;}
+"def"                           {printf("TOKEN KW_DEF:\t\t %s\n" ,yytext ); return KW_DEF;}
+"enddef"                        {printf("TOKEN KW_ENDDEF:\t\t %s\n" ,yytext ); return KW_ENDDEF;}
+"main"                          {printf("TOKEN KW_MAIN:\t\t %s\n" ,yytext ); return KW_MAIN;}
+"return"                        {printf("TOKEN KW_RETURN:\t\t %s\n" ,yytext ); return KW_RETURN;}
+"comp"                          {printf("TOKEN KW_COMP:\t\t %s\n" ,yytext ); return KW_COMP;}
+"endcomp"                       {printf("TOKEN KW_ENDCOMP:\t\t %s\n" ,yytext ); return KW_ENDCOMP;}
+"of"                            {printf("TOKEN KW_OF\t\t %s\n" ,yytext ); return KW_OF;}
 
 
 "@defmacro"                     { printf("Macro definition found\n"); BEGIN(macro); macro_initialization = 1; }
@@ -132,7 +132,7 @@ MACRO_VALUE                     ([^ \n])+
 ":="                            {return AOP_COLONASSIGN;}
 
 
-";"                             {return DEL_SMCOLON;}
+";"                             {printf("TOKEN DEL_SMCOLON\t\t %s\n" ,yytext ); return DEL_SMCOLON;}
 "("                             {return DEL_LPAR;}
 ")"                             {return DEL_RPAR;}
 ","                             {return DEL_COMMA;}
@@ -140,6 +140,7 @@ MACRO_VALUE                     ([^ \n])+
 "]"                             {return DEL_RBRACKET;}
 ":"                             {return DEL_COLON;}
 "."                             {return DEL_DOT;}
+"#"								{printf("TOKEN HASH\t\t %s\n" ,yytext ); return HASH; }
 
 
 [ \r\t]+                        /* skip whitespaces,tabs and carriage returns */
