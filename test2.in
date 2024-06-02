@@ -2,6 +2,14 @@
 def f4(prompt: str, msg:str):
 	z : integer ;
 	my_str : str;
+	z = 2;
+	z *=2;
+	z += 3;
+
+enddef;
+
+def f2(s[]:str) -> integer:
+--return 100;
 enddef;
 
 const N = 100: integer;
@@ -11,6 +19,7 @@ comp Coordinates:
 	#longtitude : integer;
 	#string : str;
 	#x1 , #y1 : integer;
+
 endcomp;
 
 const A = 100: integer;
@@ -20,4 +29,16 @@ def main( ) :
 	y : scalar ;
 	arr[5] : str;
 	p[] : bool;
+	if (25):
+		ss:integer;
+	endif;
+
+	ssss:bool;
+
+	while(245.2):
+		sj:str;
+	endwhile;
+	
+	x = 2;
+
 enddef;

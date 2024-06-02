@@ -99,6 +99,7 @@ extern int line_num;
 // Non-terminal symbols:
 %type <str> main_func
 %type <str> func_body
+
 %type <str> basic_data_type
 %type <str> identifier
 %type <str> variable_declaration
@@ -111,8 +112,14 @@ extern int line_num;
 %type <str> const
 %type <str> declaration
 %type <str> function
-%type <str> parameters_declaration
+%type <str> params
 %type <str> declarations
+
+%type <str> while_statement
+%type <str> if_statement
+%type <str> statements
+%type <str> statement_body
+%type <str> assign_statement
 
 %%
 /******************************************* RULES SECTION *******************************************/
@@ -151,12 +158,7 @@ main_func:
     KW_DEF KW_MAIN DEL_LPAR DEL_RPAR DEL_COLON func_body KW_ENDDEF DEL_SMCOLON { $$ = template("int main () {\n%s\n}", $6); }
 
 
-func_body:
-      %empty { $$ = strdup(""); }
-    | variable_declaration func_body { $$ = template("%s\n%s", $1, $2); } 
-	;
-    
-    
+  
 /************************* Variable Declaration *************************/ 
 
 variable_declaration:
@@ -191,6 +193,7 @@ comp_body:
 
 comp_field:
     comp_identifiers DEL_COLON basic_data_type DEL_SMCOLON { $$ = template("%s %s;", $3, $1); }
+    | function { $$ = template("%s", $1); }
 	;
 
 comp_identifiers:
@@ -216,21 +219,64 @@ expr:
     | expr OP_DIV expr { $$ = template("%s / %s", $1, $3); }
 ;
 
-/************************* Functions Declaration *************************/ 
+/************************* Function Declaration *************************/ 
 
 function: 
-  KW_DEF TK_IDENTIFIER DEL_LPAR parameters_declaration DEL_RPAR DEL_COLON func_body KW_ENDDEF DEL_SMCOLON 								{$$ = template("\nvoid %s(%s) {\n%s\n}\n", $2, $4, $7);}
-  | KW_DEF TK_IDENTIFIER DEL_LPAR parameters_declaration DEL_RPAR AOP_ARROW basic_data_type DEL_COLON func_body KW_ENDDEF DEL_SMCOLON 	{$$ = template("\n%s %s(%s) {\n%s\n\n}\n", $7, $2, $4, $9);}
+  KW_DEF TK_IDENTIFIER DEL_LPAR params DEL_RPAR DEL_COLON func_body KW_ENDDEF DEL_SMCOLON 								{$$ = template("\nvoid %s(%s) {\n%s\n}\n", $2, $4, $7);}
+  | KW_DEF TK_IDENTIFIER DEL_LPAR params DEL_RPAR AOP_ARROW basic_data_type DEL_COLON func_body KW_ENDDEF DEL_SMCOLON 	{$$ = template("\n%s %s(%s) {\n%s\n\n}\n", $7, $2, $4, $9);}
   ;
 
 
-parameters_declaration: 
+params: 
   %empty { $$ = "" ;}
   | TK_IDENTIFIER DEL_COLON basic_data_type {$$ = template("%s %s", $3, $1);}
-  | TK_IDENTIFIER DEL_COLON basic_data_type DEL_COMMA parameters_declaration {$$ = template("%s %s, %s", $3, $1, $5);};
+  | TK_IDENTIFIER DEL_COLON basic_data_type DEL_COMMA params {$$ = template("%s %s, %s", $3, $1, $5);};
   | TK_IDENTIFIER DEL_LBRACKET DEL_RBRACKET DEL_COLON basic_data_type {$$ = template("%s *%s", $5, $1);}
-  | TK_IDENTIFIER DEL_LBRACKET DEL_RBRACKET DEL_COLON basic_data_type DEL_COMMA parameters_declaration {$$ = template("%s *%s, %s", $5, $1, $7);}
+  | TK_IDENTIFIER DEL_LBRACKET DEL_RBRACKET DEL_COLON basic_data_type DEL_COMMA params{$$ = template("%s *%s, %s", $5, $1, $7);}
 
+  
+func_body:
+      %empty { $$ = strdup(""); }
+    | variable_declaration func_body { $$ = template("%s\n%s", $1, $2); } 
+    | statements func_body { $$ = template("%s\n%s", $1, $2); } 
+	;
+    
+    
+  
+
+/************************* STATEMENTS *************************/ 
+
+statements:
+	 if_statement
+	|  while_statement
+	| assign_statement
+	;
+	
+statement_body:
+	%empty { $$ = "" ;}
+	| variable_declaration statement_body {$$ = template("%s\n%s",$1,$2);} 
+	| statements statement_body {$$ = template("%s\n%s",$1,$2);}
+	;
+	
+assign_statement:
+    TK_IDENTIFIER AOP_ASSIGN expr DEL_SMCOLON           { $$ = template("%s = %s;", $1, $3); }
+  | TK_IDENTIFIER AOP_PLUSASSIGN expr DEL_SMCOLON       { $$ = template("%s += %s;", $1, $3); }
+  | TK_IDENTIFIER AOP_MINASSIGN expr DEL_SMCOLON        { $$ = template("%s -= %s;", $1, $3); }
+  | TK_IDENTIFIER AOP_MULASSIGN expr DEL_SMCOLON        { $$ = template("%s *= %s;", $1, $3); }
+  | TK_IDENTIFIER AOP_DIVASSIGN expr DEL_SMCOLON        { $$ = template("%s /= %s;", $1, $3); }
+  | TK_IDENTIFIER AOP_MODASSIGN expr DEL_SMCOLON        { $$ = template("%s %%= %s;", $1, $3); }
+  ;
+	
+//if else statements
+if_statement:
+	  KW_IF DEL_LPAR expr DEL_RPAR DEL_COLON statement_body KW_ENDIF DEL_SMCOLON {$$ = template("if (%s) {\n%s\n}", $3, $6);}
+	| KW_IF DEL_LPAR expr DEL_RPAR DEL_COLON statement_body KW_ELSE DEL_COLON statements KW_ENDIF DEL_SMCOLON {$$ = template("if (%s) {\n%s\n} else {\n%s\n}", $3, $6, $9);}
+	;
+  
+ 
+while_statement:
+	  KW_WHILE DEL_LPAR expr DEL_RPAR DEL_COLON statement_body KW_ENDWHILE DEL_SMCOLON { $$ = template("while (%s)\n\t%s", $3, $6); }
+	
 
 %%
 /******************************************* CODE SECTION *******************************************/
