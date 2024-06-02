@@ -1,9 +1,19 @@
+
+def f4(prompt: str, msg:str):
+	z : integer ;
+	my_str : str;
+enddef;
+
+const N = 100: integer;
+
 comp Coordinates:
 	#latitude : scalar;
 	#longtitude : integer;
 	#string : str;
 	#x1 , #y1 : integer;
 endcomp;
+
+const A = 100: integer;
 
 def main( ) :
 	x : integer ;

@@ -130,6 +130,7 @@ MACRO_VALUE                     ([^ \n])+
 "/+"                            {return AOP_DIVASSIGN;}
 "%="                            {return AOP_MODASSIGN;}
 ":="                            {return AOP_COLONASSIGN;}
+"->"                        	{printf("Token AOP_ARROW: \t%s\n", yytext); return AOP_ARROW;};
 
 
 ";"                             {printf("TOKEN DEL_SMCOLON\t\t %s\n" ,yytext ); return DEL_SMCOLON;}
