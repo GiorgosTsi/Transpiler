@@ -101,6 +101,7 @@ extern int line_num;
 %type <str> func_body
 
 %type <str> basic_data_type
+%type <str> types
 %type <str> identifier
 %type <str> variable_declaration
 //%type <str> comp_declarations
@@ -115,11 +116,15 @@ extern int line_num;
 %type <str> params
 %type <str> declarations
 
+//statements
 %type <str> while_statement
 %type <str> if_statement
 %type <str> statements
 %type <str> statement_body
 %type <str> assign_statement
+%type <str> for_statement
+%type <str> array_int_comprehension
+%type <str> array_comprehension
 
 %%
 /******************************************* RULES SECTION *******************************************/
@@ -174,6 +179,10 @@ basic_data_type:
     | KW_BOOLEAN { $$ = template("%s", "int"); }
 	;
 
+types:
+	basic_data_type 
+	;
+	
 identifier:
       TK_IDENTIFIER { $$ = $1; }
     | identifier DEL_COMMA TK_IDENTIFIER { $$ = template("%s, %s", $1, $3); }
@@ -210,7 +219,8 @@ const:
 /************************* Expressions Declaration *************************/ 
 
 expr:
-      TK_INTEGER { $$ = $1; }
+	 TK_IDENTIFIER { $$ = $1; }
+	|  TK_INTEGER { $$ = $1; }
     | TK_REAL { $$ = $1; }
     | DEL_LPAR expr DEL_RPAR { $$ = template("(%s)", $2); }
     | expr OP_PLUS expr { $$ = template("%s + %s", $1, $3); }
@@ -249,7 +259,10 @@ func_body:
 statements:
 	 if_statement
 	|  while_statement
-	| assign_statement
+	|  assign_statement
+	|  for_statement
+	|  array_int_comprehension
+	|  array_comprehension
 	;
 	
 statement_body:
@@ -276,6 +289,25 @@ if_statement:
  
 while_statement:
 	  KW_WHILE DEL_LPAR expr DEL_RPAR DEL_COLON statement_body KW_ENDWHILE DEL_SMCOLON { $$ = template("while (%s)\n\t%s", $3, $6); }
+	  
+	  
+for_statement:
+	  KW_FOR TK_IDENTIFIER KW_IN DEL_LBRACKET expr DEL_COLON expr DEL_RBRACKET DEL_COLON statement_body KW_ENDFOR DEL_SMCOLON {$$ = template("for (int %s = %s; %s < %s; %s++) {\n%s\n}", $2, $5, $2, $7, $2, $10);}
+	  | KW_FOR TK_IDENTIFIER KW_IN DEL_LBRACKET expr DEL_COLON expr DEL_COLON expr DEL_RBRACKET DEL_COLON statement_body KW_ENDFOR DEL_SMCOLON {$$ = template("for (int %s = %s; %s < %s; %s = %s + %s) 		{\n%s\n}", $2, $5, $2, $7, $2, $2, $9, $12);}
+	  ;
+
+array_int_comprehension:
+  TK_IDENTIFIER AOP_COLONASSIGN DEL_LBRACKET expr KW_FOR TK_IDENTIFIER DEL_COLON TK_INTEGER DEL_RBRACKET DEL_COLON types DEL_SMCOLON {$$ = template("%s* %s = (%s*)malloc(%s*sizeof(%s));\nfor(%s %s = 0; %s < %s; ++%s) {\n %s[%s] = %s;\n}", $11, $1, $11, $8, $11, $11, $6, $6, $8, $6, $1, $6, $4);}
+  ;
+  
+ 
+array_comprehension:
+	TK_IDENTIFIER AOP_COLONASSIGN DEL_LBRACKET expr KW_FOR TK_IDENTIFIER DEL_COLON types KW_IN TK_IDENTIFIER KW_OF TK_INTEGER DEL_RBRACKET DEL_COLON types DEL_SMCOLON 
+	{
+	char* replaced_expr = replace_str($4, $6, template("%s[%s_i]", $10, $10));
+	$$ = template("%s* %s = (%s*)malloc(%s*sizeof(%s));\nfor(int %s_i = 0; %s_i < %s; ++%s_i) {\n\t%s[%s_i] = %s;\n}", $15, $1, $15, $12, $15, $10, $10, $12, $10, $1, $10, replaced_expr);
+	}
+	;
 	
 
 %%

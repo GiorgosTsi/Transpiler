@@ -61,3 +61,39 @@ int yyerror_count = 0;
 const char *c_prologue =
     "#include \"lambdalib.h\"\n"
     "\n";
+    
+    
+///////////////////////////////////My section:
+// Function to replace occurrences of 'old' with 'new' in 'str'
+
+/*Used in array comprehension , to get the new expression with replaced elm->array[array_i] */
+char* replace_str(const char *str, const char *old, const char *new) {
+    char *result;
+    int i, cnt = 0;
+    int newlen = strlen(new);
+    int oldlen = strlen(old);
+
+    // Count the number of times old word occur in the string
+    for (i = 0; str[i] != '\0'; i++) {
+        if (strstr(&str[i], old) == &str[i]) {
+            cnt++;
+            i += oldlen - 1;
+        }
+    }
+
+    // Allocate memory for the new result string
+    result = (char *)malloc(i + cnt * (newlen - oldlen) + 1);
+
+    i = 0;
+    while (*str) {
+        if (strstr(str, old) == str) {
+            strcpy(&result[i], new);
+            i += newlen;
+            str += oldlen;
+        } else
+            result[i++] = *str++;
+    }
+
+    result[i] = '\0';
+    return result;
+}

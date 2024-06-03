@@ -1,4 +1,4 @@
-
+	
 def f4(prompt: str, msg:str):
 	z : integer ;
 	my_str : str;
@@ -6,6 +6,10 @@ def f4(prompt: str, msg:str):
 	z *=2;
 	z += 3;
 
+
+	for num in [3: limit+1: 2]:
+		x: integer;
+	endfor;
 enddef;
 
 def f2(s[]:str) -> integer:
@@ -40,5 +44,9 @@ def main( ) :
 	endwhile;
 	
 	x = 2;
+	
 
+	a := [i for i:100]:integer;
+
+	half := [ (x+1) / 2 for x: integer in a of 100] : scalar;
 enddef;
