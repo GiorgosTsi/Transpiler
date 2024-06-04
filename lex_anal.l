@@ -130,6 +130,7 @@ MACRO_VALUE                     ([^ \n])+
 "/+"                            {return AOP_DIVASSIGN;}
 "%="                            {return AOP_MODASSIGN;}
 ":="                            {return AOP_COLONASSIGN;}
+"#="                            {return AOP_HASHASSIGN;}
 "->"                        	{printf("Token AOP_ARROW: \t%s\n", yytext); return AOP_ARROW;};
 
 

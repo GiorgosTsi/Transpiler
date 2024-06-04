@@ -10,6 +10,7 @@ def f4(prompt: str, msg:str):
 	for num in [3: limit+1: 2]:
 		x: integer;
 	endfor;
+	return;
 enddef;
 
 def f2(s[]:str) -> integer:
@@ -37,10 +38,14 @@ def main( ) :
 		ss:integer;
 	endif;
 
+	f4("strrr",22/ 234);
+
 	ssss:bool;
 
-	while(245.2):
+	while(i<=14 and i!=1 or (5 == 5)):
 		sj:str;
+		sj = 12 < 15 < 12;
+		sj = (5!=4);
 	endwhile;
 	
 	x = 2;
@@ -49,4 +54,5 @@ def main( ) :
 	a := [i for i:100]:integer;
 
 	half := [ (x+1) / 2 for x: integer in a of 100] : scalar;
+	return 0;
 enddef;

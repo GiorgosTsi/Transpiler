@@ -74,6 +74,7 @@ extern int line_num;
 %token AOP_DIVASSIGN
 %token AOP_MODASSIGN
 %token AOP_COLONASSIGN
+%token AOP_HASHASSIGN
 %token AOP_ARROW
 
 //delimiters
@@ -88,15 +89,9 @@ extern int line_num;
 %token HASH
 
 %start input
-%type <str> expr
 
-// Precedence:
-%left OP_MINUS OP_PLUS 
-%left OP_MULT OP_DIV
-%left OP_MOD
-%right OP_POWER
 
-// Non-terminal symbols:
+/*********************** Non-terminal symbols: *******************/
 %type <str> main_func
 %type <str> func_body
 
@@ -116,6 +111,11 @@ extern int line_num;
 %type <str> params
 %type <str> declarations
 
+//expressions
+%type <str> expr
+%type <str> arithmetic_expr
+%type <str> relational_expr
+
 //statements
 %type <str> while_statement
 %type <str> if_statement
@@ -125,6 +125,45 @@ extern int line_num;
 %type <str> for_statement
 %type <str> array_int_comprehension
 %type <str> array_comprehension
+%type <str> return_statement
+%type <str> function_statement
+%type <str> function_arguments
+%type <str> logical_statements
+
+
+// Precedence:
+
+%left OP_MINUS OP_PLUS 
+%left OP_MULT OP_DIV
+%left OP_MOD
+%right OP_POWER
+
+%left ROP_EQUALS
+%left ROP_NOTEQUALS
+%left ROP_LESS
+%left ROP_LESSEQUALS
+%left ROP_GREATER
+%left ROP_GREATEREQUALS
+
+%right AOP_ASSIGN
+%right AOP_HASHASSIGN
+%right AOP_PLUSASSIGN 
+%right AOP_MINASSIGN
+%right AOP_MULASSIGN
+%right AOP_DIVASSIGN
+%right AOP_MODASSIGN
+%right AOP_COLONASSIGN
+%right AOP_ARROW
+
+%left DEL_DOT
+%left DEL_LPAR
+%left DEL_RPAR
+%left DEL_LBRACKET
+%left DEL_RBRACKET
+
+%left KW_NOT
+%left KW_AND
+%left KW_OR
 
 %%
 /******************************************* RULES SECTION *******************************************/
@@ -220,14 +259,43 @@ const:
 
 expr:
 	 TK_IDENTIFIER { $$ = $1; }
-	|  TK_INTEGER { $$ = $1; }
-    | TK_REAL { $$ = $1; }
+    | TK_STRING { $$ = $1; }
+    | KW_TRUE {$$ = template("1");}
+    | KW_FALSE {$$ = template("0");}    
     | DEL_LPAR expr DEL_RPAR { $$ = template("(%s)", $2); }
-    | expr OP_PLUS expr { $$ = template("%s + %s", $1, $3); }
-    | expr OP_MINUS expr { $$ = template("%s - %s", $1, $3); }
-    | expr OP_MULT expr { $$ = template("%s * %s", $1, $3); }
-    | expr OP_DIV expr { $$ = template("%s / %s", $1, $3); }
-;
+    | arithmetic_expr {$$ = $1;}
+    | relational_expr {$$ = $1;}
+    | logical_statements {$$ = $1;}
+    ;
+
+arithmetic_expr:
+    TK_INTEGER {$$ = $1;}
+    | TK_REAL {$$ = $1;}
+    | expr OP_POWER expr {$$ = template("pow(%s, %s)", $1, $3);}
+    | expr OP_MULT expr {$$ = template("%s * %s",$1, $3);}
+    | expr OP_DIV expr {$$ = template("%s / %s", $1, $3);}
+    | expr OP_MOD expr {$$ = template("%s %% %s", $1, $3);}
+    | expr OP_PLUS expr {$$ = template("%s + %s", $1, $3);}
+    | expr OP_MINUS expr {$$ = template("%s - %s", $1, $3);}
+    | OP_PLUS expr {$$ = template("+%s", $2);}
+    | OP_MINUS expr {$$ = template("-%s", $2);}
+    ;
+
+relational_expr:
+  expr ROP_LESS expr {$$ = template("%s < %s",$1, $3);}
+  | expr ROP_LESSEQUALS expr {$$ = template("%s <= %s", $1, $3);}
+  | expr ROP_GREATER expr {$$ = template("%s > %s", $1, $3);}
+  | expr ROP_GREATEREQUALS expr {$$ = template("%s >= %s", $1, $3);}
+  | expr ROP_EQUALS expr {$$ = template("%s == %s", $1, $3);}
+  | expr ROP_NOTEQUALS expr {$$ = template("%s != %s", $1, $3);}
+  ;
+
+logical_statements:
+    KW_NOT expr {$$ = template("! %s", $2);}
+    | expr KW_AND expr {$$ = template("%s && %s", $1, $3);}
+    | expr KW_OR expr {$$ = template("%s || %s", $1, $3);}
+    ;
+
 
 /************************* Function Declaration *************************/ 
 
@@ -243,13 +311,13 @@ params:
   | TK_IDENTIFIER DEL_COLON basic_data_type DEL_COMMA params {$$ = template("%s %s, %s", $3, $1, $5);};
   | TK_IDENTIFIER DEL_LBRACKET DEL_RBRACKET DEL_COLON basic_data_type {$$ = template("%s *%s", $5, $1);}
   | TK_IDENTIFIER DEL_LBRACKET DEL_RBRACKET DEL_COLON basic_data_type DEL_COMMA params{$$ = template("%s *%s, %s", $5, $1, $7);}
-
+  ;
   
 func_body:
       %empty { $$ = strdup(""); }
     | variable_declaration func_body { $$ = template("%s\n%s", $1, $2); } 
     | statements func_body { $$ = template("%s\n%s", $1, $2); } 
-	;
+	  ;
     
     
   
@@ -263,6 +331,8 @@ statements:
 	|  for_statement
 	|  array_int_comprehension
 	|  array_comprehension
+  |  return_statement
+  |  function_statement
 	;
 	
 statement_body:
@@ -308,6 +378,23 @@ array_comprehension:
 	$$ = template("%s* %s = (%s*)malloc(%s*sizeof(%s));\nfor(int %s_i = 0; %s_i < %s; ++%s_i) {\n\t%s[%s_i] = %s;\n}", $15, $1, $15, $12, $15, $10, $10, $12, $10, $1, $10, replaced_expr);
 	}
 	;
+
+return_statement:
+  KW_RETURN DEL_SMCOLON{$$ = template("return;");}
+  | KW_RETURN expr DEL_SMCOLON{$$ = template("return %s;", $2);}
+  ;
+
+
+function_statement:
+  TK_IDENTIFIER DEL_LPAR DEL_RPAR DEL_SMCOLON{$$ = template("%s();", $1);}
+  | TK_IDENTIFIER DEL_LPAR function_arguments DEL_RPAR DEL_SMCOLON{$$ = template("%s(%s);", $1,$3);}
+  ;
+
+function_arguments:
+  expr { $$ = template("%s", $1);}
+  | expr DEL_COMMA function_arguments { $$ = template("%s, %s", $1, $3); }
+  ;
+  
 	
 
 %%
