@@ -10,7 +10,15 @@
 	char* macro_table[50]; // 50 macros max 
 	char macro_table_names[50][32];
    
-	int macro_initialization = 0;   // 1 if macros identifier is not a keyword,else 0.
+  /* Function to get the macro value by giving the macro name id*/
+  char* get_macro_value_by_macro_name(const char* identifier) {
+    for (int i = macro_count - 1; i >= 0; i--) {
+      if (strcmp(macro_table_names[i], identifier) == 0) {
+        return macro_table[i];
+      }
+    }
+    return NULL;
+  }
 
 %}
 
@@ -28,19 +36,17 @@ DOUBLE_QUOTE                    "\""
 
 CONSTANT_STRING                 {DOUBLE_QUOTE}(([^\"\\]|\\[ntr\\"'])*){DOUBLE_QUOTE}
 
-MACRO_WS                        [ \t\r]+
 MACRO_VALUE                     ([^ \n])+
 
 /* Conditions  */
 %x single_line_comment
-%x macro_value_definition
-%s macro
+%x macro
 
 
 %%
 
 
-"integer"                       {printf("TOKEN KW_INT:\t\t %s\n" ,yytext ); if(macro_initialization){exit(-1);} else { return KW_INT; } }
+"integer"                       {printf("TOKEN KW_INT:\t\t %s\n" ,yytext ); return KW_INT; }
 "scalar"                        {printf("TOKEN KW_SCALAR:\t\t %s\n" ,yytext ); return KW_SCALAR;}
 "str"                           {printf("TOKEN KW_STR:\t\t %s\n" ,yytext ); return KW_STR;}
 "bool"                          {printf("TOKEN KW_BOOLEAN:\t\t %s\n" ,yytext ); return KW_BOOLEAN;}
@@ -69,7 +75,7 @@ MACRO_VALUE                     ([^ \n])+
 "of"                            {printf("TOKEN KW_OF\t\t %s\n" ,yytext ); return KW_OF;}
 
 
-"@defmacro"                     { printf("Macro definition found\n"); BEGIN(macro); macro_initialization = 1; }
+"@defmacro"                     { printf("Macro definition found\n"); BEGIN(macro);  }
 <macro>{IDENTIFIER}             { printf("Macro identifier found %s\n",yytext);
                                   
                                   for(int i=0; i < macro_count; i++){
@@ -80,20 +86,18 @@ MACRO_VALUE                     ([^ \n])+
                                   printf("num = %d\n",macro_name_exists);
                                   if(macro_name_exists == -1) //if the macro is not previously defined,define it now.
                                     strcpy(macro_table_names[macro_count],yytext);      
-                                  BEGIN(macro_value_definition);
                                 }
                                 
                                                  
-<macro_value_definition>{MACRO_VALUE}            { printf("Macro value found %s\n",yytext);
+<macro>{MACRO_VALUE}            { printf("Macro value found %s\n",yytext);
                                   if(macro_name_exists == -1){
-                                  macro_table[macro_count] = (char*)malloc(sizeof(char) * strlen(yytext));
-                                  strcpy(macro_table[macro_count],yytext);
-                                  macro_initialization = 0;                
-                                  printf("macro id:%s value: %s \n",macro_table_names[macro_count],macro_table[macro_count]);
-                                  macro_count++;
+                                    macro_table[macro_count] = (char*)malloc(sizeof(char) * strlen(yytext));
+                                    strcpy(macro_table[macro_count],yytext);               
+                                    printf("macro id:%s value: %s \n",macro_table_names[macro_count],macro_table[macro_count]);
+                                    macro_count++;
                                   }
                                   else{
-                                      //macro_name_exists contains the index of the macros name.
+                                      //"macro_name_exists" var contains the index of the macros name.
                                       free(macro_table[macro_name_exists]);
                                       macro_table[macro_name_exists] = (char*)malloc(sizeof(char) * strlen(yytext));
                                       strcpy(macro_table[macro_name_exists],yytext);
@@ -103,7 +107,22 @@ MACRO_VALUE                     ([^ \n])+
                                   BEGIN(INITIAL); }
 
 
-{IDENTIFIER}                    { printf("Identifier found : %s at line: %d\n", yytext,line_num);		yylval.str = strdup(yytext);	return TK_IDENTIFIER; }
+{IDENTIFIER}                    {
+                                  char* macro_value = get_macro_value_by_macro_name(yytext);
+                                  if (macro_value) { // if macro_value is not NULL, then this id is a macro definition
+                                      printf("Replacing identifier %s with macro value %s\n", yytext, macro_value);
+                                      // Push the macro value back onto the input stream in reverse order
+                                      for (int i = strlen(macro_value) - 1; i >= 0; i--) {
+                                          unput(macro_value[i]);
+                                      }
+                                  } else {
+                                      printf("Identifier found: %s at line: %d\n", yytext, line_num);
+                                      yylval.str = strdup(yytext);
+                                      return TK_IDENTIFIER;
+                                  }
+                                }
+
+
 {INTEGER}                       { printf("Integer found: %s at line: %d\n", yytext,line_num);			yylval.str = strdup(yytext);	return TK_INTEGER; }
 {REAL}                          { printf("Real found: %s at line: %d\n", yytext,line_num); 				yylval.str = strdup(yytext);	return TK_REAL; }
 {CONSTANT_STRING}               { printf("Constant string found %s at line: %d\n", yytext,line_num); 	yylval.str = strdup(yytext);	return TK_STRING; }

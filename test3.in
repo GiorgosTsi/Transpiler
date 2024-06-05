@@ -1,4 +1,6 @@
 
+@defmacro N 100
+
 comp Coordinates:
 	#latitude : scalar;
 	#x1 , #y1 : integer;
@@ -8,6 +10,7 @@ endcomp;
 
 def main( ) :
 	x : integer ;
+	x = N; --will be replaced by 100
 	const AA = 100+234 / 5 : scalar;
 	y : scalar ;
 	return 0;
