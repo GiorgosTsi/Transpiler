@@ -104,17 +104,16 @@ extern int yydebug;
     AOP_DIVASSIGN = 305,           /* AOP_DIVASSIGN  */
     AOP_MODASSIGN = 306,           /* AOP_MODASSIGN  */
     AOP_COLONASSIGN = 307,         /* AOP_COLONASSIGN  */
-    AOP_HASHASSIGN = 308,          /* AOP_HASHASSIGN  */
-    AOP_ARROW = 309,               /* AOP_ARROW  */
-    DEL_SMCOLON = 310,             /* DEL_SMCOLON  */
-    DEL_LPAR = 311,                /* DEL_LPAR  */
-    DEL_RPAR = 312,                /* DEL_RPAR  */
-    DEL_COMMA = 313,               /* DEL_COMMA  */
-    DEL_LBRACKET = 314,            /* DEL_LBRACKET  */
-    DEL_RBRACKET = 315,            /* DEL_RBRACKET  */
-    DEL_COLON = 316,               /* DEL_COLON  */
-    DEL_DOT = 317,                 /* DEL_DOT  */
-    HASH = 318                     /* HASH  */
+    AOP_ARROW = 308,               /* AOP_ARROW  */
+    DEL_SMCOLON = 309,             /* DEL_SMCOLON  */
+    DEL_LPAR = 310,                /* DEL_LPAR  */
+    DEL_RPAR = 311,                /* DEL_RPAR  */
+    DEL_COMMA = 312,               /* DEL_COMMA  */
+    DEL_LBRACKET = 313,            /* DEL_LBRACKET  */
+    DEL_RBRACKET = 314,            /* DEL_RBRACKET  */
+    DEL_COLON = 315,               /* DEL_COLON  */
+    DEL_DOT = 316,                 /* DEL_DOT  */
+    HASH = 317                     /* HASH  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -123,11 +122,11 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 14 "myparser.y"
+#line 17 "myparser.y"
 
   char* str;
 
-#line 131 "myparser.tab.h"
+#line 130 "myparser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

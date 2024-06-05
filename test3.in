@@ -1,0 +1,16 @@
+
+comp Coordinates:
+	#latitude : scalar;
+	#x1 , #y1 : integer;
+	def area() -> scalar: return 3.14 * (#radius ** 2); enddef;
+	def printt(n: integer , s : str): writeStr("5"); enddef;
+endcomp;
+
+def main( ) :
+	x : integer ;
+	const AA = 100+234 / 5 : scalar;
+	y : scalar ;
+	return 0;
+	x= a[2+2] + 53.5;
+--	a[2] = "str";
+enddef;

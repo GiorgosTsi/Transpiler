@@ -6,15 +6,22 @@ def f4(prompt: str, msg:str):
 	z *=2;
 	z += 3;
 
-
+	x=-a;
+	x = a + b * (b / a);
+	x=4 + 50.0*x / 2.45;
+	x=(a+1) % cube(b+3);
+	x=(a <= b) and (d <= c);
+	x=(c+a) != (2*d);
 	for num in [3: limit+1: 2]:
 		x: integer;
+		f2("str" or 2);
+		const ABC = "abc" : str;
 	endfor;
 	return;
 enddef;
 
 def f2(s[]:str) -> integer:
---return 100;
+	return 100;
 enddef;
 
 const N = 100: integer;
@@ -24,6 +31,7 @@ comp Coordinates:
 	#longtitude : integer;
 	#string : str;
 	#x1 , #y1 : integer;
+	def area() -> scalar: return 3.14 * (#radius ** 2); enddef;
 
 endcomp;
 
@@ -31,6 +39,7 @@ const A = 100: integer;
 
 def main( ) :
 	x : integer ;
+	const AA = 100+234 / 5 : scalar;
 	y : scalar ;
 	arr[5] : str;
 	p[] : bool;
@@ -46,6 +55,7 @@ def main( ) :
 		sj:str;
 		sj = 12 < 15 < 12;
 		sj = (5!=4);
+		sj= a[2 ]+a[2];
 	endwhile;
 	
 	x = 2;

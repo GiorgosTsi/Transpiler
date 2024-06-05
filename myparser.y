@@ -6,6 +6,9 @@
 
 extern int yylex(void);
 extern int line_num;
+
+char* comp_name; // used to know the comptype name when do syntax analysis of comp_function
+
 %}
 
 /******************************************* DECLARATION SECTION *******************************************/
@@ -74,7 +77,6 @@ extern int line_num;
 %token AOP_DIVASSIGN
 %token AOP_MODASSIGN
 %token AOP_COLONASSIGN
-%token AOP_HASHASSIGN
 %token AOP_ARROW
 
 //delimiters
@@ -104,6 +106,8 @@ extern int line_num;
 %type <str> comp_body
 %type <str> comp_field
 %type <str> comp_identifiers
+%type <str> comp_function
+
 //%type <str> const_declarations
 %type <str> const
 %type <str> declaration
@@ -122,10 +126,13 @@ extern int line_num;
 %type <str> statements
 %type <str> statement_body
 %type <str> assign_statement
+%type <str> identifier_expr
 %type <str> for_statement
 %type <str> array_int_comprehension
 %type <str> array_comprehension
 %type <str> return_statement
+%type <str> break_statement
+%type <str> continue_statement
 %type <str> function_statement
 %type <str> function_arguments
 %type <str> logical_statements
@@ -146,7 +153,6 @@ extern int line_num;
 %left ROP_GREATEREQUALS
 
 %right AOP_ASSIGN
-%right AOP_HASHASSIGN
 %right AOP_PLUSASSIGN 
 %right AOP_MINASSIGN
 %right AOP_MULASSIGN
@@ -172,15 +178,21 @@ input:
     %empty 
     | declarations main_func { 
         if (yyerror_count == 0) {
+            printf("Expression evaluates to:\n");
+            printf("************************\n");
             puts(c_prologue);
-            printf("Expression evaluates to:\n%s\n%s\n", $1, $2); 
+            printf("\n\n%s\n%s\n", $1, $2);
+            printf("************************\n");
         }  
     }
     
     | main_func { 
         if (yyerror_count == 0) {
+            printf("Expression evaluates to:\n");
+            printf("************************\n");
             puts(c_prologue);
-            printf("Expression evaluates to:\n%s\n", $1); 
+            printf("\n\n%s\n", $1);
+            printf("************************\n"); 
         }  
     }
 	; 
@@ -206,10 +218,10 @@ main_func:
 /************************* Variable Declaration *************************/ 
 
 variable_declaration:
-      identifier DEL_COLON basic_data_type DEL_SMCOLON { $$ = template("%s %s; ", $3, $1); }
-    | TK_IDENTIFIER DEL_LBRACKET TK_INTEGER DEL_RBRACKET DEL_COLON basic_data_type DEL_SMCOLON { $$ = template("%s %s[%s]; ", $6, $1, $3); }
-    | TK_IDENTIFIER DEL_LBRACKET DEL_RBRACKET DEL_COLON basic_data_type DEL_SMCOLON { $$ = template("%s* %s;", $5 , $1); } // pointer
-	;
+      identifier DEL_COLON types DEL_SMCOLON { $$ = template("%s %s; ", $3, $1); }
+    | TK_IDENTIFIER DEL_LBRACKET TK_INTEGER DEL_RBRACKET DEL_COLON types DEL_SMCOLON { $$ = template("%s %s[%s]; ", $6, $1, $3); }
+    | TK_IDENTIFIER DEL_LBRACKET DEL_RBRACKET DEL_COLON types DEL_SMCOLON { $$ = template("%s* %s;", $5 , $1); } // pointer
+	  ;
     
 basic_data_type:
       KW_INT { $$ = template("%s", "int"); }
@@ -231,8 +243,15 @@ identifier:
 
 
 comp:
-    KW_COMP TK_IDENTIFIER DEL_COLON comp_body KW_ENDCOMP DEL_SMCOLON { $$ = template("typedef struct %s {\n%s\n} %s;\n", $2, $4, $2); }
-	;
+    KW_COMP TK_IDENTIFIER DEL_COLON comp_body KW_ENDCOMP DEL_SMCOLON 
+    {
+
+       //comp_name = strdup( template("%s", $2) );
+       comp_name = strdup( $2 );
+       
+       $$ = template("typedef struct %s {\n%s\n} %s;\n", $2, $4, $2); 
+    }
+	  ;
 
 comp_body:
       comp_field { $$ = $1; }
@@ -240,14 +259,29 @@ comp_body:
 	;
 
 comp_field:
-    comp_identifiers DEL_COLON basic_data_type DEL_SMCOLON { $$ = template("%s %s;", $3, $1); }
-    | function { $$ = template("%s", $1); }
+    comp_identifiers DEL_COLON types DEL_SMCOLON { $$ = template("%s %s;", $3, $1); }
+    | comp_function { $$ = template("%s", $1); }
 	;
 
 comp_identifiers:
       HASH TK_IDENTIFIER { $$ = $2; }
     | comp_identifiers DEL_COMMA HASH TK_IDENTIFIER { $$ = template("%s, %s" , $1 , $4); }
-	;
+	  ;
+
+comp_function:
+    KW_DEF TK_IDENTIFIER DEL_LPAR params DEL_RPAR DEL_COLON func_body KW_ENDDEF DEL_SMCOLON 								
+    {
+      char *func_declaration = template("void (*%s)(struct %s *self %s%s)", $2, comp_name, ($4[0] != '\0') ? ", " : "" , $4);
+      char *func_definition = template("void %s(struct %s *self, %s) {\n%s\n}\n", $2, $2, $4, $7);
+      $$ = template("%s;\n", func_declaration);
+    }
+    | KW_DEF TK_IDENTIFIER DEL_LPAR params DEL_RPAR AOP_ARROW types DEL_COLON func_body KW_ENDDEF DEL_SMCOLON 	
+    {
+      char *func_declaration = template("%s (*%s)(struct %s *self %s%s)", $7, $2, comp_name, ($4[0] != '\0') ? ", " : "", $4);
+      char *func_definition = template("%s %s(struct %s *self, %s) {\n%s\n}\n", $7, $2, $2, $4, $7);
+      $$ = template("%s;\n", func_declaration);
+    }
+    ;
 
 /************************* Const Declaration *************************/ 
     
@@ -258,7 +292,7 @@ const:
 /************************* Expressions Declaration *************************/ 
 
 expr:
-	 TK_IDENTIFIER { $$ = $1; }
+    identifier_expr { $$ = $1; }
     | TK_STRING { $$ = $1; }
     | KW_TRUE {$$ = template("1");}
     | KW_FALSE {$$ = template("0");}    
@@ -266,6 +300,7 @@ expr:
     | arithmetic_expr {$$ = $1;}
     | relational_expr {$$ = $1;}
     | logical_statements {$$ = $1;}
+    | function_statement {$$ = $1;}
     ;
 
 arithmetic_expr:
@@ -280,6 +315,14 @@ arithmetic_expr:
     | OP_PLUS expr {$$ = template("+%s", $2);}
     | OP_MINUS expr {$$ = template("-%s", $2);}
     ;
+
+identifier_expr:
+
+   TK_IDENTIFIER { $$ = $1; }
+  | HASH TK_IDENTIFIER { {$$ = template("%s", $2);} }
+  | TK_IDENTIFIER DEL_LBRACKET TK_IDENTIFIER DEL_RBRACKET { $$ = template("%s[%s]", $1, $3); }
+  | TK_IDENTIFIER DEL_LBRACKET arithmetic_expr DEL_RBRACKET { $$ = template("%s[%s]", $1, $3); }
+  ;
 
 relational_expr:
   expr ROP_LESS expr {$$ = template("%s < %s",$1, $3);}
@@ -315,7 +358,8 @@ params:
   
 func_body:
       %empty { $$ = strdup(""); }
-    | variable_declaration func_body { $$ = template("%s\n%s", $1, $2); } 
+    | variable_declaration func_body { $$ = template("%s\n%s", $1, $2); }
+    | const func_body { $$ = template("%s\n%s", $1, $2); } 
     | statements func_body { $$ = template("%s\n%s", $1, $2); } 
 	  ;
     
@@ -332,15 +376,19 @@ statements:
 	|  array_int_comprehension
 	|  array_comprehension
   |  return_statement
-  |  function_statement
+  |  break_statement
+  |  continue_statement
+  |  function_statement DEL_SMCOLON { $$ = template("%s;", $1); };
 	;
 	
 statement_body:
 	%empty { $$ = "" ;}
 	| variable_declaration statement_body {$$ = template("%s\n%s",$1,$2);} 
+  | const statement_body  {$$ = template("%s\n%s",$1,$2);}
 	| statements statement_body {$$ = template("%s\n%s",$1,$2);}
 	;
 	
+/* shift defuce confl on identifier line 393*/
 assign_statement:
     TK_IDENTIFIER AOP_ASSIGN expr DEL_SMCOLON           { $$ = template("%s = %s;", $1, $3); }
   | TK_IDENTIFIER AOP_PLUSASSIGN expr DEL_SMCOLON       { $$ = template("%s += %s;", $1, $3); }
@@ -350,7 +398,7 @@ assign_statement:
   | TK_IDENTIFIER AOP_MODASSIGN expr DEL_SMCOLON        { $$ = template("%s %%= %s;", $1, $3); }
   ;
 	
-//if else statements
+
 if_statement:
 	  KW_IF DEL_LPAR expr DEL_RPAR DEL_COLON statement_body KW_ENDIF DEL_SMCOLON {$$ = template("if (%s) {\n%s\n}", $3, $6);}
 	| KW_IF DEL_LPAR expr DEL_RPAR DEL_COLON statement_body KW_ELSE DEL_COLON statements KW_ENDIF DEL_SMCOLON {$$ = template("if (%s) {\n%s\n} else {\n%s\n}", $3, $6, $9);}
@@ -379,6 +427,14 @@ array_comprehension:
 	}
 	;
 
+break_statement:
+  KW_BREAK DEL_SMCOLON {$$ = template("break;");}
+
+
+continue_statement:
+  KW_CONTINUE DEL_SMCOLON {$$ = template("continue;");}
+
+
 return_statement:
   KW_RETURN DEL_SMCOLON{$$ = template("return;");}
   | KW_RETURN expr DEL_SMCOLON{$$ = template("return %s;", $2);}
@@ -386,8 +442,8 @@ return_statement:
 
 
 function_statement:
-  TK_IDENTIFIER DEL_LPAR DEL_RPAR DEL_SMCOLON{$$ = template("%s();", $1);}
-  | TK_IDENTIFIER DEL_LPAR function_arguments DEL_RPAR DEL_SMCOLON{$$ = template("%s(%s);", $1,$3);}
+  TK_IDENTIFIER DEL_LPAR DEL_RPAR {$$ = template("%s()", $1);}
+  | TK_IDENTIFIER DEL_LPAR function_arguments DEL_RPAR {$$ = template("%s(%s)", $1,$3);}
   ;
 
 function_arguments:
