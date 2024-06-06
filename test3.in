@@ -1,19 +1,27 @@
-
-@defmacro N 100
-
 comp Coordinates:
 	#latitude : scalar;
 	#x1 , #y1 : integer;
+	#arr[5] : integer;
+	#arr2[] : scalar;
+	#x2 , #arr[5] : integer;
+	#x2 , #arr[] : integer;
+	#arr[5] , #x : integer;
+
+
 	def area() -> scalar: return 3.14 * (#radius ** 2); enddef;
 	def printt(n: integer , s : str): writeStr("5"); enddef;
 endcomp;
 
+@defmacro N 200
+
 def main( ) :
 	x : integer ;
-	x = N; --will be replaced by 100
+	z,h[] : Coordinates ;
+	x , y[5] : scalar;
+	x = N; --will be replaced by 200
 	const AA = 100+234 / 5 : scalar;
-	y : scalar ;
+	@defmacro N 400
 	return 0;
-	x= a[2+2] + 53.5;
+	x= a[2+2] + N;
 --	a[2] = "str";
 enddef;

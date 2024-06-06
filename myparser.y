@@ -218,11 +218,9 @@ main_func:
 /************************* Variable Declaration *************************/ 
 
 variable_declaration:
-      identifier DEL_COLON types DEL_SMCOLON { $$ = template("%s %s; ", $3, $1); }
-    | TK_IDENTIFIER DEL_LBRACKET TK_INTEGER DEL_RBRACKET DEL_COLON types DEL_SMCOLON { $$ = template("%s %s[%s]; ", $6, $1, $3); }
-    | TK_IDENTIFIER DEL_LBRACKET DEL_RBRACKET DEL_COLON types DEL_SMCOLON { $$ = template("%s* %s;", $5 , $1); } // pointer
-	  ;
+  identifier DEL_COLON types DEL_SMCOLON { $$ = template("%s %s;", $3, $1); }
     
+
 basic_data_type:
       KW_INT { $$ = template("%s", "int"); }
     | KW_SCALAR { $$ = template("%s", "double"); }
@@ -232,11 +230,16 @@ basic_data_type:
 
 types:
 	basic_data_type 
+  | TK_IDENTIFIER //used for comp types
 	;
 	
 identifier:
       TK_IDENTIFIER { $$ = $1; }
-    | identifier DEL_COMMA TK_IDENTIFIER { $$ = template("%s, %s", $1, $3); }
+    | TK_IDENTIFIER DEL_LBRACKET TK_INTEGER DEL_RBRACKET {$$ = template("%s[%s]", $1, $3);};
+    | TK_IDENTIFIER DEL_LBRACKET DEL_RBRACKET {$$ = template("*%s", $1);};
+    | identifier DEL_COMMA  TK_IDENTIFIER { $$ = template("%s, %s" , $1 , $3); }
+    | identifier DEL_COMMA  TK_IDENTIFIER DEL_LBRACKET TK_INTEGER DEL_RBRACKET { $$ = template("%s, %s[%s]" , $1 , $3 , $5); }
+    | identifier DEL_COMMA  TK_IDENTIFIER DEL_LBRACKET DEL_RBRACKET { $$ = template("%s, *%s" , $1 , $3 ); }
 	;
 
 /************************* Composite Types Declaration *************************/ 
@@ -247,26 +250,35 @@ comp:
     {
 
        //comp_name = strdup( template("%s", $2) );
-       comp_name = strdup( $2 );
+       comp_name = (char*)malloc(sizeof(char)*strlen($2));
+       strcpy(comp_name , $2);
        
        $$ = template("typedef struct %s {\n%s\n} %s;\n", $2, $4, $2); 
     }
 	  ;
+
 
 comp_body:
       comp_field { $$ = $1; }
     | comp_field comp_body { $$ = template("%s\n%s", $1, $2); }
 	;
 
+
 comp_field:
     comp_identifiers DEL_COLON types DEL_SMCOLON { $$ = template("%s %s;", $3, $1); }
     | comp_function { $$ = template("%s", $1); }
-	;
+	  ;
+
 
 comp_identifiers:
       HASH TK_IDENTIFIER { $$ = $2; }
+    | HASH TK_IDENTIFIER DEL_LBRACKET TK_INTEGER DEL_RBRACKET {$$ = template("%s[%s]", $2, $4);};
+    | HASH TK_IDENTIFIER DEL_LBRACKET DEL_RBRACKET {$$ = template("*%s", $2);};
     | comp_identifiers DEL_COMMA HASH TK_IDENTIFIER { $$ = template("%s, %s" , $1 , $4); }
+    | comp_identifiers DEL_COMMA HASH TK_IDENTIFIER DEL_LBRACKET TK_INTEGER DEL_RBRACKET { $$ = template("%s, %s[%s]" , $1 , $4 , $6); }
+    | comp_identifiers DEL_COMMA HASH TK_IDENTIFIER DEL_LBRACKET DEL_RBRACKET { $$ = template("%s, *%s" , $1 , $4 ); }
 	  ;
+
 
 comp_function:
     KW_DEF TK_IDENTIFIER DEL_LPAR params DEL_RPAR DEL_COLON func_body KW_ENDDEF DEL_SMCOLON 								
