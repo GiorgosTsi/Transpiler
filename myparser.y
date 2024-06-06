@@ -4,10 +4,43 @@
 #include <string.h>
 #include "cgen.h"
 
+
 extern int yylex(void);
 extern int line_num;
 
 char* comp_name; // used to know the comptype name when do syntax analysis of comp_function
+
+/*Used in array comprehension , to get the new expression with replaced elm->array[array_i] */
+char* replace_str(const char *str, const char *old, const char *new) {
+    char *result;
+    int i, cnt = 0;
+    int newlen = strlen(new);
+    int oldlen = strlen(old);
+
+    // Count the number of times old word occur in the string
+    for (i = 0; str[i] != '\0'; i++) {
+        if (strstr(&str[i], old) == &str[i]) {
+            cnt++;
+            i += oldlen - 1;
+        }
+    }
+
+    // Allocate memory for the new result string
+    result = (char *)malloc(i + cnt * (newlen - oldlen) + 1);
+
+    i = 0;
+    while (*str) {
+        if (strstr(str, old) == str) {
+            strcpy(&result[i], new);
+            i += newlen;
+            str += oldlen;
+        } else
+            result[i++] = *str++;
+    }
+
+    result[i] = '\0';
+    return result;
+}
 
 %}
 
@@ -234,8 +267,9 @@ types:
 	;
 	
 identifier:
-      TK_IDENTIFIER { $$ = $1; }
-    | TK_IDENTIFIER DEL_LBRACKET TK_INTEGER DEL_RBRACKET {$$ = template("%s[%s]", $1, $3);};
+    identifier_expr // used for simple TK_IDENTIFIER , ARRAY with expression or identifier for size .
+    //  TK_IDENTIFIER { $$ = $1; }
+    //| TK_IDENTIFIER DEL_LBRACKET TK_INTEGER DEL_RBRACKET {$$ = template("%s[%s]", $1, $3);};
     | TK_IDENTIFIER DEL_LBRACKET DEL_RBRACKET {$$ = template("*%s", $1);};
     | identifier DEL_COMMA  TK_IDENTIFIER { $$ = template("%s, %s" , $1 , $3); }
     | identifier DEL_COMMA  TK_IDENTIFIER DEL_LBRACKET TK_INTEGER DEL_RBRACKET { $$ = template("%s, %s[%s]" , $1 , $3 , $5); }
@@ -315,6 +349,7 @@ expr:
     | function_statement {$$ = $1;}
     ;
 
+
 arithmetic_expr:
     TK_INTEGER {$$ = $1;}
     | TK_REAL {$$ = $1;}
@@ -328,13 +363,14 @@ arithmetic_expr:
     | OP_MINUS expr {$$ = template("-%s", $2);}
     ;
 
-identifier_expr:
 
+identifier_expr:
    TK_IDENTIFIER { $$ = $1; }
   | HASH TK_IDENTIFIER { {$$ = template("%s", $2);} }
   | TK_IDENTIFIER DEL_LBRACKET TK_IDENTIFIER DEL_RBRACKET { $$ = template("%s[%s]", $1, $3); }
   | TK_IDENTIFIER DEL_LBRACKET arithmetic_expr DEL_RBRACKET { $$ = template("%s[%s]", $1, $3); }
   ;
+
 
 relational_expr:
   expr ROP_LESS expr {$$ = template("%s < %s",$1, $3);}
@@ -400,14 +436,14 @@ statement_body:
 	| statements statement_body {$$ = template("%s\n%s",$1,$2);}
 	;
 	
-/* shift defuce confl on identifier line 393*/
+
 assign_statement:
-    TK_IDENTIFIER AOP_ASSIGN expr DEL_SMCOLON           { $$ = template("%s = %s;", $1, $3); }
-  | TK_IDENTIFIER AOP_PLUSASSIGN expr DEL_SMCOLON       { $$ = template("%s += %s;", $1, $3); }
-  | TK_IDENTIFIER AOP_MINASSIGN expr DEL_SMCOLON        { $$ = template("%s -= %s;", $1, $3); }
-  | TK_IDENTIFIER AOP_MULASSIGN expr DEL_SMCOLON        { $$ = template("%s *= %s;", $1, $3); }
-  | TK_IDENTIFIER AOP_DIVASSIGN expr DEL_SMCOLON        { $$ = template("%s /= %s;", $1, $3); }
-  | TK_IDENTIFIER AOP_MODASSIGN expr DEL_SMCOLON        { $$ = template("%s %%= %s;", $1, $3); }
+    identifier_expr AOP_ASSIGN expr DEL_SMCOLON           { $$ = template("%s = %s;", $1, $3); }
+  | identifier_expr AOP_PLUSASSIGN expr DEL_SMCOLON       { $$ = template("%s += %s;", $1, $3); }
+  | identifier_expr AOP_MINASSIGN expr DEL_SMCOLON        { $$ = template("%s -= %s;", $1, $3); }
+  | identifier_expr AOP_MULASSIGN expr DEL_SMCOLON        { $$ = template("%s *= %s;", $1, $3); }
+  | identifier_expr AOP_DIVASSIGN expr DEL_SMCOLON        { $$ = template("%s /= %s;", $1, $3); }
+  | identifier_expr AOP_MODASSIGN expr DEL_SMCOLON        { $$ = template("%s %%= %s;", $1, $3); }
   ;
 	
 
@@ -470,8 +506,8 @@ function_arguments:
 
 int main () {
     if ( yyparse() == 0 )
-        printf("Accepted!\n");
+        printf( GREEN "Your program is syntactically correct!\n" RESET);
     else
-        printf("Rejected!\n");
+        printf(RED "Rejected!\n" RESET);
 }
 

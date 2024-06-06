@@ -6,21 +6,34 @@ comp Coordinates:
 	#x2 , #arr[5] : integer;
 	#x2 , #arr[] : integer;
 	#arr[5] , #x : integer;
-
-
+xd
 	def area() -> scalar: return 3.14 * (#radius ** 2); enddef;
+	--def move(dx: scalar, dy: scalar): #x=#x+dx; #y=#y+dx; enddef;
 	def printt(n: integer , s : str): writeStr("5"); enddef;
 endcomp;
+
+const Nig = 123.5 : scalar;
+maxN: integer;
 
 @defmacro N 200
 
 def main( ) :
+
+	-- See if variable declarations works properly:
+	latitude : scalar;
+	x1 , y1 : integer;
+	arr[5] : integer;
+	arr2[] : scalar;
+	x2 ,arr[5] : integer;
+	x2 , arr[] : integer;
+	arr[5] , x : integer;
 	x : integer ;
 	z,h[] : Coordinates ;
 	x , y[5] : scalar;
 	x = N; --will be replaced by 200
 	const AA = 100+234 / 5 : scalar;
 	@defmacro N 400
+	-- End
 	return 0;
 	x= a[2+2] + N;
 --	a[2] = "str";

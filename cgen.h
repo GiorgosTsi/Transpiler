@@ -1,6 +1,11 @@
 #ifndef CGEN_H
 #define CGEN_H
 
+
+#define GREEN   "\033[32m"      /* Green */
+#define RESET   "\033[0m"
+#define RED     "\033[31m"      /* Red */
+
 /*
 	String streams are handy for using standard C-library
 	functions to produce formatted strings.

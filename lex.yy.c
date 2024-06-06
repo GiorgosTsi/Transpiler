@@ -1020,31 +1020,30 @@ YY_RULE_SETUP
 case 28:
 YY_RULE_SETUP
 #line 78 "lex_anal.l"
-{ printf("Macro definition found\n"); BEGIN(macro);  }
+{ BEGIN(macro);  }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
 #line 79 "lex_anal.l"
-{ printf("Macro identifier found %s\n",yytext);
-                                  
+{ 
                                   for(int i=0; i < macro_count; i++){
                                       char* macro_name = macro_table_names[i];
                                       if(!strcmp(macro_name,yytext))
                                           macro_name_exists = i;
                                   }
-                                  printf("num = %d\n",macro_name_exists);
+                                  //printf("num = %d\n",macro_name_exists);
                                   if(macro_name_exists == -1) //if the macro is not previously defined,define it now.
                                     strcpy(macro_table_names[macro_count],yytext);      
                                 }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 92 "lex_anal.l"
-{ printf("Macro value found %s\n",yytext);
+#line 91 "lex_anal.l"
+{ 
                                   if(macro_name_exists == -1){
                                     macro_table[macro_count] = (char*)malloc(sizeof(char) * strlen(yytext));
                                     strcpy(macro_table[macro_count],yytext);               
-                                    printf("macro id:%s value: %s \n",macro_table_names[macro_count],macro_table[macro_count]);
+                                    //printf("macro id:%s value: %s \n",macro_table_names[macro_count],macro_table[macro_count]);
                                     macro_count++;
                                   }
                                   else{
@@ -1052,24 +1051,24 @@ YY_RULE_SETUP
                                       free(macro_table[macro_name_exists]);
                                       macro_table[macro_name_exists] = (char*)malloc(sizeof(char) * strlen(yytext));
                                       strcpy(macro_table[macro_name_exists],yytext);
-                                      printf("macro id:%s value: %s \n",macro_table_names[macro_name_exists],macro_table[macro_name_exists]);
+                                      //printf("macro id:%s value: %s \n",macro_table_names[macro_name_exists],macro_table[macro_name_exists]);
                                       macro_name_exists = -1;
                                   }
                                   BEGIN(INITIAL); }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 110 "lex_anal.l"
+#line 109 "lex_anal.l"
 {
                                   char* macro_value = get_macro_value_by_macro_name(yytext);
                                   if (macro_value) { // if macro_value is not NULL, then this id is a macro definition
-                                      printf("Replacing identifier %s with macro value %s\n", yytext, macro_value);
+                                      //printf("Replacing identifier %s with macro value %s\n", yytext, macro_value);
                                       // Push the macro value back onto the input stream in reverse order
                                       for (int i = strlen(macro_value) - 1; i >= 0; i--) {
                                           unput(macro_value[i]);
                                       }
                                   } else {
-                                      printf("Identifier found: %s at line: %d\n", yytext, line_num);
+                                      printf("TOKEN TK_IDENTIFIER:\t\t %s\n" ,yytext );
                                       yylval.str = strdup(yytext);
                                       return TK_IDENTIFIER;
                                   }
@@ -1077,209 +1076,209 @@ YY_RULE_SETUP
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 126 "lex_anal.l"
-{ printf("Integer found: %s at line: %d\n", yytext,line_num);			yylval.str = strdup(yytext);	return TK_INTEGER; }
+#line 125 "lex_anal.l"
+{ printf("TOKEN TK_INTEGER:\t\t %s\n" ,yytext );			yylval.str = strdup(yytext);	return TK_INTEGER; }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 127 "lex_anal.l"
-{ printf("Real found: %s at line: %d\n", yytext,line_num); 				yylval.str = strdup(yytext);	return TK_REAL; }
+#line 126 "lex_anal.l"
+{ printf("TOKEN TK_REAL:\t\t %s\n" ,yytext ); 				yylval.str = strdup(yytext);	return TK_REAL; }
 	YY_BREAK
 case 34:
 /* rule 34 can match eol */
 YY_RULE_SETUP
-#line 128 "lex_anal.l"
-{ printf("Constant string found %s at line: %d\n", yytext,line_num); 	yylval.str = strdup(yytext);	return TK_STRING; }
+#line 127 "lex_anal.l"
+{ printf("TOKEN TK_STRING:\t\t %s\n" ,yytext ); 	yylval.str = strdup(yytext);	return TK_STRING; }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 131 "lex_anal.l"
-{return OP_PLUS;}
+#line 130 "lex_anal.l"
+{printf("TOKEN OP_PLUS:\t\t %s\n" ,yytext ); return OP_PLUS;}
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 132 "lex_anal.l"
-{return OP_MINUS;}
+#line 131 "lex_anal.l"
+{printf("TOKEN OP_MINUS:\t\t %s\n" ,yytext ); return OP_MINUS;}
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 133 "lex_anal.l"
-{return OP_MULT;}
+#line 132 "lex_anal.l"
+{printf("TOKEN OP_MULT:\t\t %s\n" ,yytext ); return OP_MULT;}
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 134 "lex_anal.l"
-{return OP_DIV;}
+#line 133 "lex_anal.l"
+{printf("TOKEN OP_DIV:\t\t %s\n" ,yytext ); return OP_DIV;}
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 135 "lex_anal.l"
-{return OP_MOD;}
+#line 134 "lex_anal.l"
+{printf("TOKEN OP_MOD:\t\t %s\n" ,yytext ); return OP_MOD;}
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 136 "lex_anal.l"
-{return OP_POWER;}
+#line 135 "lex_anal.l"
+{printf("TOKEN OP_POWER:\t\t %s\n" ,yytext ); return OP_POWER;}
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 138 "lex_anal.l"
-{return ROP_EQUALS;}
+#line 137 "lex_anal.l"
+{printf("TOKEN ROP_EQUALS:\t\t %s\n" ,yytext ); return ROP_EQUALS;}
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 139 "lex_anal.l"
-{return ROP_NOTEQUALS;}
+#line 138 "lex_anal.l"
+{printf("TOKEN ROP_NOTEQUALS:\t\t %s\n" ,yytext ); return ROP_NOTEQUALS;}
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 140 "lex_anal.l"
-{return ROP_LESS;}
+#line 139 "lex_anal.l"
+{printf("TOKEN ROP_LESS:\t\t %s\n" ,yytext ); return ROP_LESS;}
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 141 "lex_anal.l"
-{return ROP_LESSEQUALS;}
+#line 140 "lex_anal.l"
+{printf("TOKEN ROP_LESSEQUALS:\t\t %s\n" ,yytext ); return ROP_LESSEQUALS;}
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 142 "lex_anal.l"
-{return ROP_GREATER;}
+#line 141 "lex_anal.l"
+{printf("TOKEN ROP_GREATER:\t\t %s\n" ,yytext ); return ROP_GREATER;}
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 143 "lex_anal.l"
-{return ROP_GREATEREQUALS;}
+#line 142 "lex_anal.l"
+{printf("TOKEN ROP_GREATEREQUALS:\t\t %s\n" ,yytext ); return ROP_GREATEREQUALS;}
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 145 "lex_anal.l"
-{return AOP_ASSIGN;}
+#line 144 "lex_anal.l"
+{printf("TOKEN AOP_ASSIGN:\t\t %s\n" ,yytext ); return AOP_ASSIGN;}
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 146 "lex_anal.l"
-{return AOP_PLUSASSIGN;}
+#line 145 "lex_anal.l"
+{printf("TOKEN AOP_PLUSASSIGN:\t\t %s\n" ,yytext ); return AOP_PLUSASSIGN;}
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 147 "lex_anal.l"
-{return AOP_MINASSIGN;}
+#line 146 "lex_anal.l"
+{printf("TOKEN AOP_MINASSIGN:\t\t %s\n" ,yytext ); return AOP_MINASSIGN;}
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 148 "lex_anal.l"
-{return AOP_MULASSIGN;}
+#line 147 "lex_anal.l"
+{printf("TOKEN AOP_MULASSIGN:\t\t %s\n" ,yytext ); return AOP_MULASSIGN;}
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 149 "lex_anal.l"
-{return AOP_DIVASSIGN;}
+#line 148 "lex_anal.l"
+{printf("TOKEN AOP_DIVASSIGN:\t\t %s\n" ,yytext ); return AOP_DIVASSIGN;}
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 150 "lex_anal.l"
-{return AOP_MODASSIGN;}
+#line 149 "lex_anal.l"
+{printf("TOKEN AOP_MODASSIGN:\t\t %s\n" ,yytext ); return AOP_MODASSIGN;}
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 151 "lex_anal.l"
-{return AOP_COLONASSIGN;}
+#line 150 "lex_anal.l"
+{printf("TOKEN AOP_COLONASSIGN:\t\t %s\n" ,yytext ); return AOP_COLONASSIGN;}
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 152 "lex_anal.l"
+#line 151 "lex_anal.l"
 {printf("Token AOP_ARROW: \t%s\n", yytext); return AOP_ARROW;};
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 155 "lex_anal.l"
+#line 154 "lex_anal.l"
 {printf("TOKEN DEL_SMCOLON\t\t %s\n" ,yytext ); return DEL_SMCOLON;}
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 156 "lex_anal.l"
-{return DEL_LPAR;}
+#line 155 "lex_anal.l"
+{printf("TOKEN DEL_LPAR:\t\t %s\n" ,yytext ); return DEL_LPAR;}
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 157 "lex_anal.l"
-{return DEL_RPAR;}
+#line 156 "lex_anal.l"
+{printf("TOKEN DEL_RPAR:\t\t %s\n" ,yytext ); return DEL_RPAR;}
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 158 "lex_anal.l"
-{return DEL_COMMA;}
+#line 157 "lex_anal.l"
+{printf("TOKEN DEL_COMMA:\t\t %s\n" ,yytext ); return DEL_COMMA;}
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 159 "lex_anal.l"
-{return DEL_LBRACKET;}
+#line 158 "lex_anal.l"
+{printf("TOKEN DEL_LBRACKET:\t\t %s\n" ,yytext ); return DEL_LBRACKET;}
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 160 "lex_anal.l"
-{return DEL_RBRACKET;}
+#line 159 "lex_anal.l"
+{printf("TOKEN DEL_RBRACKET:\t\t %s\n" ,yytext ); return DEL_RBRACKET;}
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
-#line 161 "lex_anal.l"
-{return DEL_COLON;}
+#line 160 "lex_anal.l"
+{printf("TOKEN DEL_COLON:\t\t %s\n" ,yytext ); return DEL_COLON;}
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 162 "lex_anal.l"
-{return DEL_DOT;}
+#line 161 "lex_anal.l"
+{printf("TOKEN DEL_DOT:\t\t %s\n" ,yytext ); return DEL_DOT;}
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
-#line 163 "lex_anal.l"
+#line 162 "lex_anal.l"
 {printf("TOKEN HASH\t\t %s\n" ,yytext ); return HASH; }
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
-#line 166 "lex_anal.l"
+#line 165 "lex_anal.l"
 /* skip whitespaces,tabs and carriage returns */
 	YY_BREAK
 case 65:
 /* rule 65 can match eol */
 YY_RULE_SETUP
-#line 167 "lex_anal.l"
+#line 166 "lex_anal.l"
 {line_num++;}
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
-#line 170 "lex_anal.l"
+#line 169 "lex_anal.l"
 { BEGIN(single_line_comment); }
 	YY_BREAK
 case 67:
 YY_RULE_SETUP
-#line 171 "lex_anal.l"
+#line 170 "lex_anal.l"
 /*Eat anything in the line comment */
 	YY_BREAK
 case 68:
 /* rule 68 can match eol */
 YY_RULE_SETUP
-#line 172 "lex_anal.l"
+#line 171 "lex_anal.l"
 { line_num++; BEGIN(INITIAL); }
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(single_line_comment):
 case YY_STATE_EOF(macro):
-#line 174 "lex_anal.l"
+#line 173 "lex_anal.l"
 { return EOF; }  /*End of file*/
 	YY_BREAK
 case 69:
 YY_RULE_SETUP
-#line 175 "lex_anal.l"
+#line 174 "lex_anal.l"
 { yyerror("lexical error: unrecognized literal '%s'\n", yytext); }
 	YY_BREAK
 case 70:
 YY_RULE_SETUP
-#line 177 "lex_anal.l"
+#line 176 "lex_anal.l"
 ECHO;
 	YY_BREAK
-#line 1283 "lex.yy.c"
+#line 1282 "lex.yy.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -2282,7 +2281,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 177 "lex_anal.l"
+#line 176 "lex_anal.l"
 
-/********* CODE SECTION ***********/
+
 

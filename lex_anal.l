@@ -75,25 +75,24 @@ MACRO_VALUE                     ([^ \n])+
 "of"                            {printf("TOKEN KW_OF\t\t %s\n" ,yytext ); return KW_OF;}
 
 
-"@defmacro"                     { printf("Macro definition found\n"); BEGIN(macro);  }
-<macro>{IDENTIFIER}             { printf("Macro identifier found %s\n",yytext);
-                                  
+"@defmacro"                     { BEGIN(macro);  }
+<macro>{IDENTIFIER}             { 
                                   for(int i=0; i < macro_count; i++){
                                       char* macro_name = macro_table_names[i];
                                       if(!strcmp(macro_name,yytext))
                                           macro_name_exists = i;
                                   }
-                                  printf("num = %d\n",macro_name_exists);
+                                  //printf("num = %d\n",macro_name_exists);
                                   if(macro_name_exists == -1) //if the macro is not previously defined,define it now.
                                     strcpy(macro_table_names[macro_count],yytext);      
                                 }
                                 
                                                  
-<macro>{MACRO_VALUE}            { printf("Macro value found %s\n",yytext);
+<macro>{MACRO_VALUE}            { 
                                   if(macro_name_exists == -1){
                                     macro_table[macro_count] = (char*)malloc(sizeof(char) * strlen(yytext));
                                     strcpy(macro_table[macro_count],yytext);               
-                                    printf("macro id:%s value: %s \n",macro_table_names[macro_count],macro_table[macro_count]);
+                                    //printf("macro id:%s value: %s \n",macro_table_names[macro_count],macro_table[macro_count]);
                                     macro_count++;
                                   }
                                   else{
@@ -101,7 +100,7 @@ MACRO_VALUE                     ([^ \n])+
                                       free(macro_table[macro_name_exists]);
                                       macro_table[macro_name_exists] = (char*)malloc(sizeof(char) * strlen(yytext));
                                       strcpy(macro_table[macro_name_exists],yytext);
-                                      printf("macro id:%s value: %s \n",macro_table_names[macro_name_exists],macro_table[macro_name_exists]);
+                                      //printf("macro id:%s value: %s \n",macro_table_names[macro_name_exists],macro_table[macro_name_exists]);
                                       macro_name_exists = -1;
                                   }
                                   BEGIN(INITIAL); }
@@ -110,57 +109,57 @@ MACRO_VALUE                     ([^ \n])+
 {IDENTIFIER}                    {
                                   char* macro_value = get_macro_value_by_macro_name(yytext);
                                   if (macro_value) { // if macro_value is not NULL, then this id is a macro definition
-                                      printf("Replacing identifier %s with macro value %s\n", yytext, macro_value);
+                                      //printf("Replacing identifier %s with macro value %s\n", yytext, macro_value);
                                       // Push the macro value back onto the input stream in reverse order
                                       for (int i = strlen(macro_value) - 1; i >= 0; i--) {
                                           unput(macro_value[i]);
                                       }
                                   } else {
-                                      printf("Identifier found: %s at line: %d\n", yytext, line_num);
+                                      printf("TOKEN TK_IDENTIFIER:\t\t %s\n" ,yytext );
                                       yylval.str = strdup(yytext);
                                       return TK_IDENTIFIER;
                                   }
                                 }
 
 
-{INTEGER}                       { printf("Integer found: %s at line: %d\n", yytext,line_num);			yylval.str = strdup(yytext);	return TK_INTEGER; }
-{REAL}                          { printf("Real found: %s at line: %d\n", yytext,line_num); 				yylval.str = strdup(yytext);	return TK_REAL; }
-{CONSTANT_STRING}               { printf("Constant string found %s at line: %d\n", yytext,line_num); 	yylval.str = strdup(yytext);	return TK_STRING; }
+{INTEGER}                       { printf("TOKEN TK_INTEGER:\t\t %s\n" ,yytext );			yylval.str = strdup(yytext);	return TK_INTEGER; }
+{REAL}                          { printf("TOKEN TK_REAL:\t\t %s\n" ,yytext ); 				yylval.str = strdup(yytext);	return TK_REAL; }
+{CONSTANT_STRING}               { printf("TOKEN TK_STRING:\t\t %s\n" ,yytext ); 	yylval.str = strdup(yytext);	return TK_STRING; }
 
 
-"+"                             {return OP_PLUS;}
-"-"                             {return OP_MINUS;}
-"*"                             {return OP_MULT;}
-"/"                             {return OP_DIV;}
-"%"                             {return OP_MOD;}
-"**"                            {return OP_POWER;}
+"+"                             {printf("TOKEN OP_PLUS:\t\t %s\n" ,yytext ); return OP_PLUS;}
+"-"                             {printf("TOKEN OP_MINUS:\t\t %s\n" ,yytext ); return OP_MINUS;}
+"*"                             {printf("TOKEN OP_MULT:\t\t %s\n" ,yytext ); return OP_MULT;}
+"/"                             {printf("TOKEN OP_DIV:\t\t %s\n" ,yytext ); return OP_DIV;}
+"%"                             {printf("TOKEN OP_MOD:\t\t %s\n" ,yytext ); return OP_MOD;}
+"**"                            {printf("TOKEN OP_POWER:\t\t %s\n" ,yytext ); return OP_POWER;}
 
-"=="                            {return ROP_EQUALS;}
-"!="                            {return ROP_NOTEQUALS;}
-"<"                             {return ROP_LESS;}
-"<="                            {return ROP_LESSEQUALS;}
-">"                             {return ROP_GREATER;}
-">="                            {return ROP_GREATEREQUALS;}
+"=="                            {printf("TOKEN ROP_EQUALS:\t\t %s\n" ,yytext ); return ROP_EQUALS;}
+"!="                            {printf("TOKEN ROP_NOTEQUALS:\t\t %s\n" ,yytext ); return ROP_NOTEQUALS;}
+"<"                             {printf("TOKEN ROP_LESS:\t\t %s\n" ,yytext ); return ROP_LESS;}
+"<="                            {printf("TOKEN ROP_LESSEQUALS:\t\t %s\n" ,yytext ); return ROP_LESSEQUALS;}
+">"                             {printf("TOKEN ROP_GREATER:\t\t %s\n" ,yytext ); return ROP_GREATER;}
+">="                            {printf("TOKEN ROP_GREATEREQUALS:\t\t %s\n" ,yytext ); return ROP_GREATEREQUALS;}
 
-"="                             {return AOP_ASSIGN;}
-"+="                            {return AOP_PLUSASSIGN;}
-"-+"                            {return AOP_MINASSIGN;}
-"*="                            {return AOP_MULASSIGN;}
-"/+"                            {return AOP_DIVASSIGN;}
-"%="                            {return AOP_MODASSIGN;}
-":="                            {return AOP_COLONASSIGN;}
-"->"                        	{printf("Token AOP_ARROW: \t%s\n", yytext); return AOP_ARROW;};
+"="                             {printf("TOKEN AOP_ASSIGN:\t\t %s\n" ,yytext ); return AOP_ASSIGN;}
+"+="                            {printf("TOKEN AOP_PLUSASSIGN:\t\t %s\n" ,yytext ); return AOP_PLUSASSIGN;}
+"-+"                            {printf("TOKEN AOP_MINASSIGN:\t\t %s\n" ,yytext ); return AOP_MINASSIGN;}
+"*="                            {printf("TOKEN AOP_MULASSIGN:\t\t %s\n" ,yytext ); return AOP_MULASSIGN;}
+"/+"                            {printf("TOKEN AOP_DIVASSIGN:\t\t %s\n" ,yytext ); return AOP_DIVASSIGN;}
+"%="                            {printf("TOKEN AOP_MODASSIGN:\t\t %s\n" ,yytext ); return AOP_MODASSIGN;}
+":="                            {printf("TOKEN AOP_COLONASSIGN:\t\t %s\n" ,yytext ); return AOP_COLONASSIGN;}
+"->"                        	  {printf("Token AOP_ARROW: \t%s\n", yytext); return AOP_ARROW;};
 
 
 ";"                             {printf("TOKEN DEL_SMCOLON\t\t %s\n" ,yytext ); return DEL_SMCOLON;}
-"("                             {return DEL_LPAR;}
-")"                             {return DEL_RPAR;}
-","                             {return DEL_COMMA;}
-"["                             {return DEL_LBRACKET;}
-"]"                             {return DEL_RBRACKET;}
-":"                             {return DEL_COLON;}
-"."                             {return DEL_DOT;}
-"#"								{printf("TOKEN HASH\t\t %s\n" ,yytext ); return HASH; }
+"("                             {printf("TOKEN DEL_LPAR:\t\t %s\n" ,yytext ); return DEL_LPAR;}
+")"                             {printf("TOKEN DEL_RPAR:\t\t %s\n" ,yytext ); return DEL_RPAR;}
+","                             {printf("TOKEN DEL_COMMA:\t\t %s\n" ,yytext ); return DEL_COMMA;}
+"["                             {printf("TOKEN DEL_LBRACKET:\t\t %s\n" ,yytext ); return DEL_LBRACKET;}
+"]"                             {printf("TOKEN DEL_RBRACKET:\t\t %s\n" ,yytext ); return DEL_RBRACKET;}
+":"                             {printf("TOKEN DEL_COLON:\t\t %s\n" ,yytext ); return DEL_COLON;}
+"."                             {printf("TOKEN DEL_DOT:\t\t %s\n" ,yytext ); return DEL_DOT;}
+"#"								              {printf("TOKEN HASH\t\t %s\n" ,yytext ); return HASH; }
 
 
 [ \r\t]+                        /* skip whitespaces,tabs and carriage returns */
@@ -175,4 +174,4 @@ MACRO_VALUE                     ([^ \n])+
 .                               { yyerror("lexical error: unrecognized literal '%s'\n", yytext); }
 
 %%
-/********* CODE SECTION ***********/
+
