@@ -8,8 +8,6 @@
 extern int yylex(void);
 extern int line_num;
 
-char* comp_name; // used to know the comptype name when do syntax analysis of comp_function
-
 /*Used in array comprehension , to get the new expression with replaced elm->array[array_i] */
 char* replace_str(const char *str, const char *old, const char *new) {
     char *result;
@@ -282,12 +280,7 @@ identifier:
 comp:
     KW_COMP TK_IDENTIFIER DEL_COLON comp_body KW_ENDCOMP DEL_SMCOLON 
     {
-
-       //comp_name = strdup( template("%s", $2) );
-       comp_name = (char*)malloc(sizeof(char)*strlen($2));
-       strcpy(comp_name , $2);
-       
-       $$ = template("typedef struct %s {\n%s\n} %s;\n", $2, $4, $2); 
+       $$ = template("\n#define SELF struct %s *self\n\ntypedef struct %s {\n%s\n} %s;\n\n#undef SELF\n", $2, $2, $4, $2); 
     }
 	  ;
 
@@ -317,14 +310,14 @@ comp_identifiers:
 comp_function:
     KW_DEF TK_IDENTIFIER DEL_LPAR params DEL_RPAR DEL_COLON func_body KW_ENDDEF DEL_SMCOLON 								
     {
-      char *func_declaration = template("void (*%s)(struct %s *self %s%s)", $2, comp_name, ($4[0] != '\0') ? ", " : "" , $4);
-      char *func_definition = template("void %s(struct %s *self, %s) {\n%s\n}\n", $2, $2, $4, $7);
+      char *func_declaration = template("void (*%s)(SELF %s%s)", $2, ( ($4[0] != '\0') ? ", " : "" ) , $4);
+      char *func_definition = template("void %s(SELF, %s) {\n%s\n}\n", $2, ( ($4[0] != '\0') ? ", " : "" ), $7);
       $$ = template("%s;\n", func_declaration);
     }
     | KW_DEF TK_IDENTIFIER DEL_LPAR params DEL_RPAR AOP_ARROW types DEL_COLON func_body KW_ENDDEF DEL_SMCOLON 	
     {
-      char *func_declaration = template("%s (*%s)(struct %s *self %s%s)", $7, $2, comp_name, ($4[0] != '\0') ? ", " : "", $4);
-      char *func_definition = template("%s %s(struct %s *self, %s) {\n%s\n}\n", $7, $2, $2, $4, $7);
+      char *func_declaration = template("%s (*%s)(SELF %s%s)", $7, $2, ($4[0] != '\0') ? ", " : "", $4);
+      char *func_definition = template("%s %s(SELF, %s) {\n%s\n}\n", $7, $2, ( ($4[0] != '\0') ? ", " : "" ), $7);
       $$ = template("%s;\n", func_declaration);
     }
     ;

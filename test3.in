@@ -6,9 +6,10 @@ comp Coordinates:
 	#x2 , #arr[5] : integer;
 	#x2 , #arr[] : integer;
 	#arr[5] , #x : integer;
-xd
+	
+
 	def area() -> scalar: return 3.14 * (#radius ** 2); enddef;
-	--def move(dx: scalar, dy: scalar): #x=#x+dx; #y=#y+dx; enddef;
+	def move(dx: scalar, dy: scalar): #x=#x+dx; #y=#y+dx; enddef;
 	def printt(n: integer , s : str): writeStr("5"); enddef;
 endcomp;
 
