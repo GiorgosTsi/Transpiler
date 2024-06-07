@@ -78,6 +78,10 @@
 extern int yylex(void);
 extern int line_num;
 
+char ** comp_functions =  NULL;
+int comp_num_functions = 0;
+
+
 /*Used in array comprehension , to get the new expression with replaced elm->array[array_i] */
 char* replace_str(const char *str, const char *old, const char *new) {
     char *result;
@@ -111,7 +115,7 @@ char* replace_str(const char *str, const char *old, const char *new) {
 }
 
 
-#line 115 "myparser.tab.c"
+#line 119 "myparser.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -629,18 +633,18 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,   209,   209,   210,   220,   232,   233,   237,   238,   239,
-     240,   245,   252,   256,   257,   258,   259,   263,   264,   268,
-     271,   272,   273,   274,   281,   289,   290,   295,   296,   301,
-     302,   303,   304,   305,   306,   311,   317,   328,   334,   335,
-     336,   337,   338,   339,   340,   341,   342,   347,   348,   349,
-     350,   351,   352,   353,   354,   355,   356,   361,   362,   363,
-     364,   369,   370,   371,   372,   373,   374,   378,   379,   380,
-     387,   388,   393,   394,   395,   396,   397,   401,   402,   403,
-     404,   413,   414,   415,   416,   417,   418,   419,   420,   421,
-     422,   426,   427,   428,   429,   434,   435,   436,   437,   438,
-     439,   444,   445,   450,   454,   455,   459,   464,   472,   476,
-     480,   481,   486,   487,   491,   492
+       0,   213,   213,   214,   224,   236,   237,   241,   242,   243,
+     244,   249,   256,   260,   261,   262,   263,   267,   268,   272,
+     275,   276,   277,   278,   285,   304,   305,   310,   311,   316,
+     317,   318,   319,   320,   321,   326,   339,   358,   364,   365,
+     366,   367,   368,   369,   370,   371,   372,   377,   378,   379,
+     380,   381,   382,   383,   384,   385,   386,   391,   392,   393,
+     394,   399,   400,   401,   402,   403,   404,   408,   409,   410,
+     417,   418,   423,   424,   425,   426,   427,   431,   432,   433,
+     434,   443,   444,   445,   446,   447,   448,   449,   450,   451,
+     452,   456,   457,   458,   459,   464,   465,   466,   467,   468,
+     469,   474,   475,   480,   484,   485,   489,   494,   502,   506,
+     510,   511,   516,   517,   521,   522
 };
 #endif
 
@@ -1486,7 +1490,7 @@ yyreduce:
   switch (yyn)
     {
   case 3: /* input: declarations main_func  */
-#line 210 "myparser.y"
+#line 214 "myparser.y"
                              { 
         if (yyerror_count == 0) {
             printf("Expression evaluates to:\n");
@@ -1496,11 +1500,11 @@ yyreduce:
             printf("************************\n");
         }  
     }
-#line 1500 "myparser.tab.c"
+#line 1504 "myparser.tab.c"
     break;
 
   case 4: /* input: main_func  */
-#line 220 "myparser.y"
+#line 224 "myparser.y"
                 { 
         if (yyerror_count == 0) {
             printf("Expression evaluates to:\n");
@@ -1510,618 +1514,644 @@ yyreduce:
             printf("************************\n"); 
         }  
     }
-#line 1514 "myparser.tab.c"
+#line 1518 "myparser.tab.c"
     break;
 
   case 5: /* declarations: declarations declaration  */
-#line 232 "myparser.y"
+#line 236 "myparser.y"
                            { (yyval.str) = template("%s\n%s", (yyvsp[-1].str), (yyvsp[0].str)); }
-#line 1520 "myparser.tab.c"
+#line 1524 "myparser.tab.c"
     break;
 
   case 6: /* declarations: declaration  */
-#line 233 "myparser.y"
+#line 237 "myparser.y"
                 { (yyval.str) = (yyvsp[0].str); }
-#line 1526 "myparser.tab.c"
+#line 1530 "myparser.tab.c"
     break;
 
   case 7: /* declaration: variable_declaration  */
-#line 237 "myparser.y"
+#line 241 "myparser.y"
                        { (yyval.str) = (yyvsp[0].str); }
-#line 1532 "myparser.tab.c"
+#line 1536 "myparser.tab.c"
     break;
 
   case 8: /* declaration: comp  */
-#line 238 "myparser.y"
+#line 242 "myparser.y"
          { (yyval.str) = (yyvsp[0].str); }
-#line 1538 "myparser.tab.c"
+#line 1542 "myparser.tab.c"
     break;
 
   case 9: /* declaration: const  */
-#line 239 "myparser.y"
+#line 243 "myparser.y"
           { (yyval.str) = (yyvsp[0].str); }
-#line 1544 "myparser.tab.c"
+#line 1548 "myparser.tab.c"
     break;
 
   case 10: /* declaration: function  */
-#line 240 "myparser.y"
+#line 244 "myparser.y"
              { (yyval.str) = (yyvsp[0].str); }
-#line 1550 "myparser.tab.c"
+#line 1554 "myparser.tab.c"
     break;
 
   case 11: /* main_func: KW_DEF KW_MAIN DEL_LPAR DEL_RPAR DEL_COLON func_body KW_ENDDEF DEL_SMCOLON  */
-#line 245 "myparser.y"
+#line 249 "myparser.y"
                                                                                { (yyval.str) = template("int main () {\n%s\n}", (yyvsp[-2].str)); }
-#line 1556 "myparser.tab.c"
+#line 1560 "myparser.tab.c"
     break;
 
   case 12: /* variable_declaration: identifier DEL_COLON types DEL_SMCOLON  */
-#line 252 "myparser.y"
+#line 256 "myparser.y"
                                          { (yyval.str) = template("%s %s;", (yyvsp[-1].str), (yyvsp[-3].str)); }
-#line 1562 "myparser.tab.c"
+#line 1566 "myparser.tab.c"
     break;
 
   case 13: /* basic_data_type: KW_INT  */
-#line 256 "myparser.y"
+#line 260 "myparser.y"
              { (yyval.str) = template("%s", "int"); }
-#line 1568 "myparser.tab.c"
+#line 1572 "myparser.tab.c"
     break;
 
   case 14: /* basic_data_type: KW_SCALAR  */
-#line 257 "myparser.y"
+#line 261 "myparser.y"
                 { (yyval.str) = template("%s", "double"); }
-#line 1574 "myparser.tab.c"
+#line 1578 "myparser.tab.c"
     break;
 
   case 15: /* basic_data_type: KW_STR  */
-#line 258 "myparser.y"
+#line 262 "myparser.y"
              { (yyval.str) = template("%s", "char*"); }
-#line 1580 "myparser.tab.c"
+#line 1584 "myparser.tab.c"
     break;
 
   case 16: /* basic_data_type: KW_BOOLEAN  */
-#line 259 "myparser.y"
+#line 263 "myparser.y"
                  { (yyval.str) = template("%s", "int"); }
-#line 1586 "myparser.tab.c"
+#line 1590 "myparser.tab.c"
     break;
 
   case 20: /* identifier: TK_IDENTIFIER DEL_LBRACKET DEL_RBRACKET  */
-#line 271 "myparser.y"
+#line 275 "myparser.y"
                                               {(yyval.str) = template("*%s", (yyvsp[-2].str));}
-#line 1592 "myparser.tab.c"
+#line 1596 "myparser.tab.c"
     break;
 
   case 21: /* identifier: identifier DEL_COMMA TK_IDENTIFIER  */
-#line 272 "myparser.y"
+#line 276 "myparser.y"
                                           { (yyval.str) = template("%s, %s" , (yyvsp[-2].str) , (yyvsp[0].str)); }
-#line 1598 "myparser.tab.c"
+#line 1602 "myparser.tab.c"
     break;
 
   case 22: /* identifier: identifier DEL_COMMA TK_IDENTIFIER DEL_LBRACKET TK_INTEGER DEL_RBRACKET  */
-#line 273 "myparser.y"
+#line 277 "myparser.y"
                                                                                { (yyval.str) = template("%s, %s[%s]" , (yyvsp[-5].str) , (yyvsp[-3].str) , (yyvsp[-1].str)); }
-#line 1604 "myparser.tab.c"
+#line 1608 "myparser.tab.c"
     break;
 
   case 23: /* identifier: identifier DEL_COMMA TK_IDENTIFIER DEL_LBRACKET DEL_RBRACKET  */
-#line 274 "myparser.y"
+#line 278 "myparser.y"
                                                                     { (yyval.str) = template("%s, *%s" , (yyvsp[-4].str) , (yyvsp[-2].str) ); }
-#line 1610 "myparser.tab.c"
+#line 1614 "myparser.tab.c"
     break;
 
   case 24: /* comp: KW_COMP TK_IDENTIFIER DEL_COLON comp_body KW_ENDCOMP DEL_SMCOLON  */
-#line 282 "myparser.y"
+#line 286 "myparser.y"
     {
-       (yyval.str) = template("\n#define SELF struct %s *self\n\ntypedef struct %s {\n%s\n} %s;\n\n#undef SELF\n", (yyvsp[-4].str), (yyvsp[-4].str), (yyvsp[-2].str), (yyvsp[-4].str)); 
+       char* all_funcs = NULL;
+      /*
+       for(int i=0 ; i < comp_num_functions ; i++){
+          char* func = comp_functions[i];
+          all_funcs = (char*)realloc(all_funcs , sizeof(char) * (strlen(all_funcs) + strlen(func) + 2) );
+          all_funcs[strlen(all_funcs) -2 ] = '\n';
+          all_funcs[strlen(all_funcs) -1 ] = '\n';   
+       }
+       */
+       char * one_func = comp_functions[1];
+       (yyval.str) = template("\n#define SELF struct %s *self\n\ntypedef struct %s {\n%s\n} %s;\n%s\n\n#undef SELF\n", (yyvsp[-4].str), (yyvsp[-4].str), (yyvsp[-2].str), (yyvsp[-4].str) , one_func); 
+       comp_num_functions = 0;
     }
-#line 1618 "myparser.tab.c"
+#line 1633 "myparser.tab.c"
     break;
 
   case 25: /* comp_body: comp_field  */
-#line 289 "myparser.y"
+#line 304 "myparser.y"
                  { (yyval.str) = (yyvsp[0].str); }
-#line 1624 "myparser.tab.c"
+#line 1639 "myparser.tab.c"
     break;
 
   case 26: /* comp_body: comp_field comp_body  */
-#line 290 "myparser.y"
+#line 305 "myparser.y"
                            { (yyval.str) = template("%s\n%s", (yyvsp[-1].str), (yyvsp[0].str)); }
-#line 1630 "myparser.tab.c"
+#line 1645 "myparser.tab.c"
     break;
 
   case 27: /* comp_field: comp_identifiers DEL_COLON types DEL_SMCOLON  */
-#line 295 "myparser.y"
+#line 310 "myparser.y"
                                                  { (yyval.str) = template("%s %s;", (yyvsp[-1].str), (yyvsp[-3].str)); }
-#line 1636 "myparser.tab.c"
+#line 1651 "myparser.tab.c"
     break;
 
   case 28: /* comp_field: comp_function  */
-#line 296 "myparser.y"
+#line 311 "myparser.y"
                     { (yyval.str) = template("%s", (yyvsp[0].str)); }
-#line 1642 "myparser.tab.c"
+#line 1657 "myparser.tab.c"
     break;
 
   case 29: /* comp_identifiers: HASH TK_IDENTIFIER  */
-#line 301 "myparser.y"
+#line 316 "myparser.y"
                          { (yyval.str) = (yyvsp[0].str); }
-#line 1648 "myparser.tab.c"
+#line 1663 "myparser.tab.c"
     break;
 
   case 30: /* comp_identifiers: HASH TK_IDENTIFIER DEL_LBRACKET TK_INTEGER DEL_RBRACKET  */
-#line 302 "myparser.y"
+#line 317 "myparser.y"
                                                               {(yyval.str) = template("%s[%s]", (yyvsp[-3].str), (yyvsp[-1].str));}
-#line 1654 "myparser.tab.c"
+#line 1669 "myparser.tab.c"
     break;
 
   case 31: /* comp_identifiers: HASH TK_IDENTIFIER DEL_LBRACKET DEL_RBRACKET  */
-#line 303 "myparser.y"
+#line 318 "myparser.y"
                                                    {(yyval.str) = template("*%s", (yyvsp[-2].str));}
-#line 1660 "myparser.tab.c"
+#line 1675 "myparser.tab.c"
     break;
 
   case 32: /* comp_identifiers: comp_identifiers DEL_COMMA HASH TK_IDENTIFIER  */
-#line 304 "myparser.y"
+#line 319 "myparser.y"
                                                     { (yyval.str) = template("%s, %s" , (yyvsp[-3].str) , (yyvsp[0].str)); }
-#line 1666 "myparser.tab.c"
+#line 1681 "myparser.tab.c"
     break;
 
   case 33: /* comp_identifiers: comp_identifiers DEL_COMMA HASH TK_IDENTIFIER DEL_LBRACKET TK_INTEGER DEL_RBRACKET  */
-#line 305 "myparser.y"
+#line 320 "myparser.y"
                                                                                          { (yyval.str) = template("%s, %s[%s]" , (yyvsp[-6].str) , (yyvsp[-3].str) , (yyvsp[-1].str)); }
-#line 1672 "myparser.tab.c"
+#line 1687 "myparser.tab.c"
     break;
 
   case 34: /* comp_identifiers: comp_identifiers DEL_COMMA HASH TK_IDENTIFIER DEL_LBRACKET DEL_RBRACKET  */
-#line 306 "myparser.y"
+#line 321 "myparser.y"
                                                                               { (yyval.str) = template("%s, *%s" , (yyvsp[-5].str) , (yyvsp[-2].str) ); }
-#line 1678 "myparser.tab.c"
+#line 1693 "myparser.tab.c"
     break;
 
   case 35: /* comp_function: KW_DEF TK_IDENTIFIER DEL_LPAR params DEL_RPAR DEL_COLON func_body KW_ENDDEF DEL_SMCOLON  */
-#line 312 "myparser.y"
+#line 327 "myparser.y"
     {
       char *func_declaration = template("void (*%s)(SELF %s%s)", (yyvsp[-7].str), ( ((yyvsp[-5].str)[0] != '\0') ? ", " : "" ) , (yyvsp[-5].str));
-      char *func_definition = template("void %s(SELF, %s) {\n%s\n}\n", (yyvsp[-7].str), ( ((yyvsp[-5].str)[0] != '\0') ? ", " : "" ), (yyvsp[-2].str));
+      char *func_definition = template("void %s(SELF %s%s) {\n%s\n}\n", (yyvsp[-7].str), ( ((yyvsp[-5].str)[0] != '\0') ? ", " : "" ),(yyvsp[-5].str), (yyvsp[-2].str));
+      comp_num_functions++;
+       
+      comp_functions = (char**)realloc(comp_functions , comp_num_functions * sizeof(char*));
+      
+      comp_functions[comp_num_functions - 1] = (char*)malloc(sizeof(char) * strlen(func_definition));
+      comp_functions[comp_num_functions - 1] = strdup(func_definition);
+
       (yyval.str) = template("%s;\n", func_declaration);
     }
-#line 1688 "myparser.tab.c"
-    break;
-
-  case 36: /* comp_function: KW_DEF TK_IDENTIFIER DEL_LPAR params DEL_RPAR AOP_ARROW types DEL_COLON func_body KW_ENDDEF DEL_SMCOLON  */
-#line 318 "myparser.y"
-    {
-      char *func_declaration = template("%s (*%s)(SELF %s%s)", (yyvsp[-4].str), (yyvsp[-9].str), ((yyvsp[-7].str)[0] != '\0') ? ", " : "", (yyvsp[-7].str));
-      char *func_definition = template("%s %s(SELF, %s) {\n%s\n}\n", (yyvsp[-4].str), (yyvsp[-9].str), ( ((yyvsp[-7].str)[0] != '\0') ? ", " : "" ), (yyvsp[-4].str));
-      (yyval.str) = template("%s;\n", func_declaration);
-    }
-#line 1698 "myparser.tab.c"
-    break;
-
-  case 37: /* const: KW_CONST identifier AOP_ASSIGN expr DEL_COLON basic_data_type DEL_SMCOLON  */
-#line 328 "myparser.y"
-                                                                              { (yyval.str) = template("const %s %s = %s;", (yyvsp[-1].str), (yyvsp[-5].str), (yyvsp[-3].str)); }
-#line 1704 "myparser.tab.c"
-    break;
-
-  case 38: /* expr: identifier_expr  */
-#line 334 "myparser.y"
-                    { (yyval.str) = (yyvsp[0].str); }
 #line 1710 "myparser.tab.c"
     break;
 
-  case 39: /* expr: TK_STRING  */
-#line 335 "myparser.y"
-                { (yyval.str) = (yyvsp[0].str); }
-#line 1716 "myparser.tab.c"
-    break;
+  case 36: /* comp_function: KW_DEF TK_IDENTIFIER DEL_LPAR params DEL_RPAR AOP_ARROW types DEL_COLON func_body KW_ENDDEF DEL_SMCOLON  */
+#line 340 "myparser.y"
+    {
+      char *func_declaration = template("%s (*%s)(SELF %s%s)", (yyvsp[-4].str), (yyvsp[-9].str), ((yyvsp[-7].str)[0] != '\0') ? ", " : "", (yyvsp[-7].str));
+      char *func_definition = template("%s %s(SELF %s%s) {\n%s\n}\n", (yyvsp[-4].str), (yyvsp[-9].str), ( ((yyvsp[-7].str)[0] != '\0') ? ", " : "" ), (yyvsp[-7].str), (yyvsp[-2].str));
+      comp_num_functions++;
 
-  case 40: /* expr: KW_TRUE  */
-#line 336 "myparser.y"
-              {(yyval.str) = template("1");}
-#line 1722 "myparser.tab.c"
-    break;
+       
+      comp_functions = (char**)realloc(comp_functions , comp_num_functions * sizeof(char*));
+      
+      comp_functions[comp_num_functions - 1] = (char*)malloc(sizeof(char) * strlen(func_definition));
+      comp_functions[comp_num_functions - 1] = strdup(func_definition);
 
-  case 41: /* expr: KW_FALSE  */
-#line 337 "myparser.y"
-               {(yyval.str) = template("0");}
+      (yyval.str) = template("%s;\n", func_declaration);
+    }
 #line 1728 "myparser.tab.c"
     break;
 
-  case 42: /* expr: DEL_LPAR expr DEL_RPAR  */
-#line 338 "myparser.y"
-                             { (yyval.str) = template("(%s)", (yyvsp[-1].str)); }
+  case 37: /* const: KW_CONST identifier AOP_ASSIGN expr DEL_COLON basic_data_type DEL_SMCOLON  */
+#line 358 "myparser.y"
+                                                                              { (yyval.str) = template("const %s %s = %s;", (yyvsp[-1].str), (yyvsp[-5].str), (yyvsp[-3].str)); }
 #line 1734 "myparser.tab.c"
     break;
 
-  case 43: /* expr: arithmetic_expr  */
-#line 339 "myparser.y"
-                      {(yyval.str) = (yyvsp[0].str);}
+  case 38: /* expr: identifier_expr  */
+#line 364 "myparser.y"
+                    { (yyval.str) = (yyvsp[0].str); }
 #line 1740 "myparser.tab.c"
     break;
 
-  case 44: /* expr: relational_expr  */
-#line 340 "myparser.y"
-                      {(yyval.str) = (yyvsp[0].str);}
+  case 39: /* expr: TK_STRING  */
+#line 365 "myparser.y"
+                { (yyval.str) = (yyvsp[0].str); }
 #line 1746 "myparser.tab.c"
     break;
 
-  case 45: /* expr: logical_statements  */
-#line 341 "myparser.y"
-                         {(yyval.str) = (yyvsp[0].str);}
+  case 40: /* expr: KW_TRUE  */
+#line 366 "myparser.y"
+              {(yyval.str) = template("1");}
 #line 1752 "myparser.tab.c"
     break;
 
-  case 46: /* expr: function_statement  */
-#line 342 "myparser.y"
-                         {(yyval.str) = (yyvsp[0].str);}
+  case 41: /* expr: KW_FALSE  */
+#line 367 "myparser.y"
+               {(yyval.str) = template("0");}
 #line 1758 "myparser.tab.c"
     break;
 
-  case 47: /* arithmetic_expr: TK_INTEGER  */
-#line 347 "myparser.y"
-               {(yyval.str) = (yyvsp[0].str);}
+  case 42: /* expr: DEL_LPAR expr DEL_RPAR  */
+#line 368 "myparser.y"
+                             { (yyval.str) = template("(%s)", (yyvsp[-1].str)); }
 #line 1764 "myparser.tab.c"
     break;
 
-  case 48: /* arithmetic_expr: TK_REAL  */
-#line 348 "myparser.y"
-              {(yyval.str) = (yyvsp[0].str);}
+  case 43: /* expr: arithmetic_expr  */
+#line 369 "myparser.y"
+                      {(yyval.str) = (yyvsp[0].str);}
 #line 1770 "myparser.tab.c"
     break;
 
-  case 49: /* arithmetic_expr: expr OP_POWER expr  */
-#line 349 "myparser.y"
-                         {(yyval.str) = template("pow(%s, %s)", (yyvsp[-2].str), (yyvsp[0].str));}
+  case 44: /* expr: relational_expr  */
+#line 370 "myparser.y"
+                      {(yyval.str) = (yyvsp[0].str);}
 #line 1776 "myparser.tab.c"
     break;
 
-  case 50: /* arithmetic_expr: expr OP_MULT expr  */
-#line 350 "myparser.y"
-                        {(yyval.str) = template("%s * %s",(yyvsp[-2].str), (yyvsp[0].str));}
+  case 45: /* expr: logical_statements  */
+#line 371 "myparser.y"
+                         {(yyval.str) = (yyvsp[0].str);}
 #line 1782 "myparser.tab.c"
     break;
 
-  case 51: /* arithmetic_expr: expr OP_DIV expr  */
-#line 351 "myparser.y"
-                       {(yyval.str) = template("%s / %s", (yyvsp[-2].str), (yyvsp[0].str));}
+  case 46: /* expr: function_statement  */
+#line 372 "myparser.y"
+                         {(yyval.str) = (yyvsp[0].str);}
 #line 1788 "myparser.tab.c"
     break;
 
-  case 52: /* arithmetic_expr: expr OP_MOD expr  */
-#line 352 "myparser.y"
-                       {(yyval.str) = template("%s %% %s", (yyvsp[-2].str), (yyvsp[0].str));}
+  case 47: /* arithmetic_expr: TK_INTEGER  */
+#line 377 "myparser.y"
+               {(yyval.str) = (yyvsp[0].str);}
 #line 1794 "myparser.tab.c"
     break;
 
-  case 53: /* arithmetic_expr: expr OP_PLUS expr  */
-#line 353 "myparser.y"
-                        {(yyval.str) = template("%s + %s", (yyvsp[-2].str), (yyvsp[0].str));}
+  case 48: /* arithmetic_expr: TK_REAL  */
+#line 378 "myparser.y"
+              {(yyval.str) = (yyvsp[0].str);}
 #line 1800 "myparser.tab.c"
     break;
 
-  case 54: /* arithmetic_expr: expr OP_MINUS expr  */
-#line 354 "myparser.y"
-                         {(yyval.str) = template("%s - %s", (yyvsp[-2].str), (yyvsp[0].str));}
+  case 49: /* arithmetic_expr: expr OP_POWER expr  */
+#line 379 "myparser.y"
+                         {(yyval.str) = template("pow(%s, %s)", (yyvsp[-2].str), (yyvsp[0].str));}
 #line 1806 "myparser.tab.c"
     break;
 
-  case 55: /* arithmetic_expr: OP_PLUS expr  */
-#line 355 "myparser.y"
-                   {(yyval.str) = template("+%s", (yyvsp[0].str));}
+  case 50: /* arithmetic_expr: expr OP_MULT expr  */
+#line 380 "myparser.y"
+                        {(yyval.str) = template("%s * %s",(yyvsp[-2].str), (yyvsp[0].str));}
 #line 1812 "myparser.tab.c"
     break;
 
-  case 56: /* arithmetic_expr: OP_MINUS expr  */
-#line 356 "myparser.y"
-                    {(yyval.str) = template("-%s", (yyvsp[0].str));}
+  case 51: /* arithmetic_expr: expr OP_DIV expr  */
+#line 381 "myparser.y"
+                       {(yyval.str) = template("%s / %s", (yyvsp[-2].str), (yyvsp[0].str));}
 #line 1818 "myparser.tab.c"
     break;
 
-  case 57: /* identifier_expr: TK_IDENTIFIER  */
-#line 361 "myparser.y"
-                 { (yyval.str) = (yyvsp[0].str); }
+  case 52: /* arithmetic_expr: expr OP_MOD expr  */
+#line 382 "myparser.y"
+                       {(yyval.str) = template("%s %% %s", (yyvsp[-2].str), (yyvsp[0].str));}
 #line 1824 "myparser.tab.c"
     break;
 
-  case 58: /* identifier_expr: HASH TK_IDENTIFIER  */
-#line 362 "myparser.y"
-                       { {(yyval.str) = template("%s", (yyvsp[0].str));} }
+  case 53: /* arithmetic_expr: expr OP_PLUS expr  */
+#line 383 "myparser.y"
+                        {(yyval.str) = template("%s + %s", (yyvsp[-2].str), (yyvsp[0].str));}
 #line 1830 "myparser.tab.c"
     break;
 
-  case 59: /* identifier_expr: TK_IDENTIFIER DEL_LBRACKET TK_IDENTIFIER DEL_RBRACKET  */
-#line 363 "myparser.y"
-                                                          { (yyval.str) = template("%s[%s]", (yyvsp[-3].str), (yyvsp[-1].str)); }
+  case 54: /* arithmetic_expr: expr OP_MINUS expr  */
+#line 384 "myparser.y"
+                         {(yyval.str) = template("%s - %s", (yyvsp[-2].str), (yyvsp[0].str));}
 #line 1836 "myparser.tab.c"
     break;
 
-  case 60: /* identifier_expr: TK_IDENTIFIER DEL_LBRACKET arithmetic_expr DEL_RBRACKET  */
-#line 364 "myparser.y"
-                                                            { (yyval.str) = template("%s[%s]", (yyvsp[-3].str), (yyvsp[-1].str)); }
+  case 55: /* arithmetic_expr: OP_PLUS expr  */
+#line 385 "myparser.y"
+                   {(yyval.str) = template("+%s", (yyvsp[0].str));}
 #line 1842 "myparser.tab.c"
     break;
 
-  case 61: /* relational_expr: expr ROP_LESS expr  */
-#line 369 "myparser.y"
-                     {(yyval.str) = template("%s < %s",(yyvsp[-2].str), (yyvsp[0].str));}
+  case 56: /* arithmetic_expr: OP_MINUS expr  */
+#line 386 "myparser.y"
+                    {(yyval.str) = template("-%s", (yyvsp[0].str));}
 #line 1848 "myparser.tab.c"
     break;
 
-  case 62: /* relational_expr: expr ROP_LESSEQUALS expr  */
-#line 370 "myparser.y"
-                             {(yyval.str) = template("%s <= %s", (yyvsp[-2].str), (yyvsp[0].str));}
+  case 57: /* identifier_expr: TK_IDENTIFIER  */
+#line 391 "myparser.y"
+                 { (yyval.str) = (yyvsp[0].str); }
 #line 1854 "myparser.tab.c"
     break;
 
-  case 63: /* relational_expr: expr ROP_GREATER expr  */
-#line 371 "myparser.y"
-                          {(yyval.str) = template("%s > %s", (yyvsp[-2].str), (yyvsp[0].str));}
+  case 58: /* identifier_expr: HASH TK_IDENTIFIER  */
+#line 392 "myparser.y"
+                       { {(yyval.str) = template("%s", (yyvsp[0].str));} }
 #line 1860 "myparser.tab.c"
     break;
 
-  case 64: /* relational_expr: expr ROP_GREATEREQUALS expr  */
-#line 372 "myparser.y"
-                                {(yyval.str) = template("%s >= %s", (yyvsp[-2].str), (yyvsp[0].str));}
+  case 59: /* identifier_expr: TK_IDENTIFIER DEL_LBRACKET TK_IDENTIFIER DEL_RBRACKET  */
+#line 393 "myparser.y"
+                                                          { (yyval.str) = template("%s[%s]", (yyvsp[-3].str), (yyvsp[-1].str)); }
 #line 1866 "myparser.tab.c"
     break;
 
-  case 65: /* relational_expr: expr ROP_EQUALS expr  */
-#line 373 "myparser.y"
-                         {(yyval.str) = template("%s == %s", (yyvsp[-2].str), (yyvsp[0].str));}
+  case 60: /* identifier_expr: TK_IDENTIFIER DEL_LBRACKET arithmetic_expr DEL_RBRACKET  */
+#line 394 "myparser.y"
+                                                            { (yyval.str) = template("%s[%s]", (yyvsp[-3].str), (yyvsp[-1].str)); }
 #line 1872 "myparser.tab.c"
     break;
 
-  case 66: /* relational_expr: expr ROP_NOTEQUALS expr  */
-#line 374 "myparser.y"
-                            {(yyval.str) = template("%s != %s", (yyvsp[-2].str), (yyvsp[0].str));}
+  case 61: /* relational_expr: expr ROP_LESS expr  */
+#line 399 "myparser.y"
+                     {(yyval.str) = template("%s < %s",(yyvsp[-2].str), (yyvsp[0].str));}
 #line 1878 "myparser.tab.c"
     break;
 
-  case 67: /* logical_statements: KW_NOT expr  */
-#line 378 "myparser.y"
-                {(yyval.str) = template("! %s", (yyvsp[0].str));}
+  case 62: /* relational_expr: expr ROP_LESSEQUALS expr  */
+#line 400 "myparser.y"
+                             {(yyval.str) = template("%s <= %s", (yyvsp[-2].str), (yyvsp[0].str));}
 #line 1884 "myparser.tab.c"
     break;
 
-  case 68: /* logical_statements: expr KW_AND expr  */
-#line 379 "myparser.y"
-                       {(yyval.str) = template("%s && %s", (yyvsp[-2].str), (yyvsp[0].str));}
+  case 63: /* relational_expr: expr ROP_GREATER expr  */
+#line 401 "myparser.y"
+                          {(yyval.str) = template("%s > %s", (yyvsp[-2].str), (yyvsp[0].str));}
 #line 1890 "myparser.tab.c"
     break;
 
-  case 69: /* logical_statements: expr KW_OR expr  */
-#line 380 "myparser.y"
-                      {(yyval.str) = template("%s || %s", (yyvsp[-2].str), (yyvsp[0].str));}
+  case 64: /* relational_expr: expr ROP_GREATEREQUALS expr  */
+#line 402 "myparser.y"
+                                {(yyval.str) = template("%s >= %s", (yyvsp[-2].str), (yyvsp[0].str));}
 #line 1896 "myparser.tab.c"
     break;
 
-  case 70: /* function: KW_DEF TK_IDENTIFIER DEL_LPAR params DEL_RPAR DEL_COLON func_body KW_ENDDEF DEL_SMCOLON  */
-#line 387 "myparser.y"
-                                                                                                                                                        {(yyval.str) = template("\nvoid %s(%s) {\n%s\n}\n", (yyvsp[-7].str), (yyvsp[-5].str), (yyvsp[-2].str));}
+  case 65: /* relational_expr: expr ROP_EQUALS expr  */
+#line 403 "myparser.y"
+                         {(yyval.str) = template("%s == %s", (yyvsp[-2].str), (yyvsp[0].str));}
 #line 1902 "myparser.tab.c"
     break;
 
-  case 71: /* function: KW_DEF TK_IDENTIFIER DEL_LPAR params DEL_RPAR AOP_ARROW basic_data_type DEL_COLON func_body KW_ENDDEF DEL_SMCOLON  */
-#line 388 "myparser.y"
-                                                                                                                        {(yyval.str) = template("\n%s %s(%s) {\n%s\n\n}\n", (yyvsp[-4].str), (yyvsp[-9].str), (yyvsp[-7].str), (yyvsp[-2].str));}
+  case 66: /* relational_expr: expr ROP_NOTEQUALS expr  */
+#line 404 "myparser.y"
+                            {(yyval.str) = template("%s != %s", (yyvsp[-2].str), (yyvsp[0].str));}
 #line 1908 "myparser.tab.c"
     break;
 
-  case 72: /* params: %empty  */
-#line 393 "myparser.y"
-         { (yyval.str) = "" ;}
+  case 67: /* logical_statements: KW_NOT expr  */
+#line 408 "myparser.y"
+                {(yyval.str) = template("! %s", (yyvsp[0].str));}
 #line 1914 "myparser.tab.c"
     break;
 
-  case 73: /* params: TK_IDENTIFIER DEL_COLON basic_data_type  */
-#line 394 "myparser.y"
-                                            {(yyval.str) = template("%s %s", (yyvsp[0].str), (yyvsp[-2].str));}
+  case 68: /* logical_statements: expr KW_AND expr  */
+#line 409 "myparser.y"
+                       {(yyval.str) = template("%s && %s", (yyvsp[-2].str), (yyvsp[0].str));}
 #line 1920 "myparser.tab.c"
     break;
 
-  case 74: /* params: TK_IDENTIFIER DEL_COLON basic_data_type DEL_COMMA params  */
-#line 395 "myparser.y"
-                                                             {(yyval.str) = template("%s %s, %s", (yyvsp[-2].str), (yyvsp[-4].str), (yyvsp[0].str));}
+  case 69: /* logical_statements: expr KW_OR expr  */
+#line 410 "myparser.y"
+                      {(yyval.str) = template("%s || %s", (yyvsp[-2].str), (yyvsp[0].str));}
 #line 1926 "myparser.tab.c"
     break;
 
-  case 75: /* params: TK_IDENTIFIER DEL_LBRACKET DEL_RBRACKET DEL_COLON basic_data_type  */
-#line 396 "myparser.y"
-                                                                      {(yyval.str) = template("%s *%s", (yyvsp[0].str), (yyvsp[-4].str));}
+  case 70: /* function: KW_DEF TK_IDENTIFIER DEL_LPAR params DEL_RPAR DEL_COLON func_body KW_ENDDEF DEL_SMCOLON  */
+#line 417 "myparser.y"
+                                                                                                                                                        {(yyval.str) = template("\nvoid %s(%s) {\n%s\n}\n", (yyvsp[-7].str), (yyvsp[-5].str), (yyvsp[-2].str));}
 #line 1932 "myparser.tab.c"
     break;
 
-  case 76: /* params: TK_IDENTIFIER DEL_LBRACKET DEL_RBRACKET DEL_COLON basic_data_type DEL_COMMA params  */
-#line 397 "myparser.y"
-                                                                                      {(yyval.str) = template("%s *%s, %s", (yyvsp[-2].str), (yyvsp[-6].str), (yyvsp[0].str));}
+  case 71: /* function: KW_DEF TK_IDENTIFIER DEL_LPAR params DEL_RPAR AOP_ARROW basic_data_type DEL_COLON func_body KW_ENDDEF DEL_SMCOLON  */
+#line 418 "myparser.y"
+                                                                                                                        {(yyval.str) = template("\n%s %s(%s) {\n%s\n\n}\n", (yyvsp[-4].str), (yyvsp[-9].str), (yyvsp[-7].str), (yyvsp[-2].str));}
 #line 1938 "myparser.tab.c"
     break;
 
-  case 77: /* func_body: %empty  */
-#line 401 "myparser.y"
-             { (yyval.str) = strdup(""); }
+  case 72: /* params: %empty  */
+#line 423 "myparser.y"
+         { (yyval.str) = "" ;}
 #line 1944 "myparser.tab.c"
     break;
 
-  case 78: /* func_body: variable_declaration func_body  */
-#line 402 "myparser.y"
-                                     { (yyval.str) = template("%s\n%s", (yyvsp[-1].str), (yyvsp[0].str)); }
+  case 73: /* params: TK_IDENTIFIER DEL_COLON basic_data_type  */
+#line 424 "myparser.y"
+                                            {(yyval.str) = template("%s %s", (yyvsp[0].str), (yyvsp[-2].str));}
 #line 1950 "myparser.tab.c"
     break;
 
-  case 79: /* func_body: const func_body  */
-#line 403 "myparser.y"
-                      { (yyval.str) = template("%s\n%s", (yyvsp[-1].str), (yyvsp[0].str)); }
+  case 74: /* params: TK_IDENTIFIER DEL_COLON basic_data_type DEL_COMMA params  */
+#line 425 "myparser.y"
+                                                             {(yyval.str) = template("%s %s, %s", (yyvsp[-2].str), (yyvsp[-4].str), (yyvsp[0].str));}
 #line 1956 "myparser.tab.c"
     break;
 
-  case 80: /* func_body: statements func_body  */
-#line 404 "myparser.y"
-                           { (yyval.str) = template("%s\n%s", (yyvsp[-1].str), (yyvsp[0].str)); }
+  case 75: /* params: TK_IDENTIFIER DEL_LBRACKET DEL_RBRACKET DEL_COLON basic_data_type  */
+#line 426 "myparser.y"
+                                                                      {(yyval.str) = template("%s *%s", (yyvsp[0].str), (yyvsp[-4].str));}
 #line 1962 "myparser.tab.c"
     break;
 
-  case 90: /* statements: function_statement DEL_SMCOLON  */
-#line 422 "myparser.y"
-                                    { (yyval.str) = template("%s;", (yyvsp[-1].str)); }
+  case 76: /* params: TK_IDENTIFIER DEL_LBRACKET DEL_RBRACKET DEL_COLON basic_data_type DEL_COMMA params  */
+#line 427 "myparser.y"
+                                                                                      {(yyval.str) = template("%s *%s, %s", (yyvsp[-2].str), (yyvsp[-6].str), (yyvsp[0].str));}
 #line 1968 "myparser.tab.c"
     break;
 
-  case 91: /* statement_body: %empty  */
-#line 426 "myparser.y"
-               { (yyval.str) = "" ;}
+  case 77: /* func_body: %empty  */
+#line 431 "myparser.y"
+             { (yyval.str) = strdup(""); }
 #line 1974 "myparser.tab.c"
     break;
 
-  case 92: /* statement_body: variable_declaration statement_body  */
-#line 427 "myparser.y"
-                                              {(yyval.str) = template("%s\n%s",(yyvsp[-1].str),(yyvsp[0].str));}
+  case 78: /* func_body: variable_declaration func_body  */
+#line 432 "myparser.y"
+                                     { (yyval.str) = template("%s\n%s", (yyvsp[-1].str), (yyvsp[0].str)); }
 #line 1980 "myparser.tab.c"
     break;
 
-  case 93: /* statement_body: const statement_body  */
-#line 428 "myparser.y"
-                          {(yyval.str) = template("%s\n%s",(yyvsp[-1].str),(yyvsp[0].str));}
+  case 79: /* func_body: const func_body  */
+#line 433 "myparser.y"
+                      { (yyval.str) = template("%s\n%s", (yyvsp[-1].str), (yyvsp[0].str)); }
 #line 1986 "myparser.tab.c"
     break;
 
-  case 94: /* statement_body: statements statement_body  */
-#line 429 "myparser.y"
-                                    {(yyval.str) = template("%s\n%s",(yyvsp[-1].str),(yyvsp[0].str));}
+  case 80: /* func_body: statements func_body  */
+#line 434 "myparser.y"
+                           { (yyval.str) = template("%s\n%s", (yyvsp[-1].str), (yyvsp[0].str)); }
 #line 1992 "myparser.tab.c"
     break;
 
-  case 95: /* assign_statement: identifier_expr AOP_ASSIGN expr DEL_SMCOLON  */
-#line 434 "myparser.y"
-                                                          { (yyval.str) = template("%s = %s;", (yyvsp[-3].str), (yyvsp[-1].str)); }
+  case 90: /* statements: function_statement DEL_SMCOLON  */
+#line 452 "myparser.y"
+                                    { (yyval.str) = template("%s;", (yyvsp[-1].str)); }
 #line 1998 "myparser.tab.c"
     break;
 
-  case 96: /* assign_statement: identifier_expr AOP_PLUSASSIGN expr DEL_SMCOLON  */
-#line 435 "myparser.y"
-                                                          { (yyval.str) = template("%s += %s;", (yyvsp[-3].str), (yyvsp[-1].str)); }
+  case 91: /* statement_body: %empty  */
+#line 456 "myparser.y"
+               { (yyval.str) = "" ;}
 #line 2004 "myparser.tab.c"
     break;
 
-  case 97: /* assign_statement: identifier_expr AOP_MINASSIGN expr DEL_SMCOLON  */
-#line 436 "myparser.y"
-                                                          { (yyval.str) = template("%s -= %s;", (yyvsp[-3].str), (yyvsp[-1].str)); }
+  case 92: /* statement_body: variable_declaration statement_body  */
+#line 457 "myparser.y"
+                                              {(yyval.str) = template("%s\n%s",(yyvsp[-1].str),(yyvsp[0].str));}
 #line 2010 "myparser.tab.c"
     break;
 
-  case 98: /* assign_statement: identifier_expr AOP_MULASSIGN expr DEL_SMCOLON  */
-#line 437 "myparser.y"
-                                                          { (yyval.str) = template("%s *= %s;", (yyvsp[-3].str), (yyvsp[-1].str)); }
+  case 93: /* statement_body: const statement_body  */
+#line 458 "myparser.y"
+                          {(yyval.str) = template("%s\n%s",(yyvsp[-1].str),(yyvsp[0].str));}
 #line 2016 "myparser.tab.c"
     break;
 
-  case 99: /* assign_statement: identifier_expr AOP_DIVASSIGN expr DEL_SMCOLON  */
-#line 438 "myparser.y"
-                                                          { (yyval.str) = template("%s /= %s;", (yyvsp[-3].str), (yyvsp[-1].str)); }
+  case 94: /* statement_body: statements statement_body  */
+#line 459 "myparser.y"
+                                    {(yyval.str) = template("%s\n%s",(yyvsp[-1].str),(yyvsp[0].str));}
 #line 2022 "myparser.tab.c"
     break;
 
-  case 100: /* assign_statement: identifier_expr AOP_MODASSIGN expr DEL_SMCOLON  */
-#line 439 "myparser.y"
-                                                          { (yyval.str) = template("%s %%= %s;", (yyvsp[-3].str), (yyvsp[-1].str)); }
+  case 95: /* assign_statement: identifier_expr AOP_ASSIGN expr DEL_SMCOLON  */
+#line 464 "myparser.y"
+                                                          { (yyval.str) = template("%s = %s;", (yyvsp[-3].str), (yyvsp[-1].str)); }
 #line 2028 "myparser.tab.c"
     break;
 
-  case 101: /* if_statement: KW_IF DEL_LPAR expr DEL_RPAR DEL_COLON statement_body KW_ENDIF DEL_SMCOLON  */
-#line 444 "myparser.y"
-                                                                                     {(yyval.str) = template("if (%s) {\n%s\n}", (yyvsp[-5].str), (yyvsp[-2].str));}
+  case 96: /* assign_statement: identifier_expr AOP_PLUSASSIGN expr DEL_SMCOLON  */
+#line 465 "myparser.y"
+                                                          { (yyval.str) = template("%s += %s;", (yyvsp[-3].str), (yyvsp[-1].str)); }
 #line 2034 "myparser.tab.c"
     break;
 
-  case 102: /* if_statement: KW_IF DEL_LPAR expr DEL_RPAR DEL_COLON statement_body KW_ELSE DEL_COLON statements KW_ENDIF DEL_SMCOLON  */
-#line 445 "myparser.y"
-                                                                                                                  {(yyval.str) = template("if (%s) {\n%s\n} else {\n%s\n}", (yyvsp[-8].str), (yyvsp[-5].str), (yyvsp[-2].str));}
+  case 97: /* assign_statement: identifier_expr AOP_MINASSIGN expr DEL_SMCOLON  */
+#line 466 "myparser.y"
+                                                          { (yyval.str) = template("%s -= %s;", (yyvsp[-3].str), (yyvsp[-1].str)); }
 #line 2040 "myparser.tab.c"
     break;
 
-  case 103: /* while_statement: KW_WHILE DEL_LPAR expr DEL_RPAR DEL_COLON statement_body KW_ENDWHILE DEL_SMCOLON  */
-#line 450 "myparser.y"
-                                                                                           { (yyval.str) = template("while (%s)\n\t%s", (yyvsp[-5].str), (yyvsp[-2].str)); }
+  case 98: /* assign_statement: identifier_expr AOP_MULASSIGN expr DEL_SMCOLON  */
+#line 467 "myparser.y"
+                                                          { (yyval.str) = template("%s *= %s;", (yyvsp[-3].str), (yyvsp[-1].str)); }
 #line 2046 "myparser.tab.c"
     break;
 
-  case 104: /* for_statement: KW_FOR TK_IDENTIFIER KW_IN DEL_LBRACKET expr DEL_COLON expr DEL_RBRACKET DEL_COLON statement_body KW_ENDFOR DEL_SMCOLON  */
-#line 454 "myparser.y"
-                                                                                                                                  {(yyval.str) = template("for (int %s = %s; %s < %s; %s++) {\n%s\n}", (yyvsp[-10].str), (yyvsp[-7].str), (yyvsp[-10].str), (yyvsp[-5].str), (yyvsp[-10].str), (yyvsp[-2].str));}
+  case 99: /* assign_statement: identifier_expr AOP_DIVASSIGN expr DEL_SMCOLON  */
+#line 468 "myparser.y"
+                                                          { (yyval.str) = template("%s /= %s;", (yyvsp[-3].str), (yyvsp[-1].str)); }
 #line 2052 "myparser.tab.c"
     break;
 
-  case 105: /* for_statement: KW_FOR TK_IDENTIFIER KW_IN DEL_LBRACKET expr DEL_COLON expr DEL_COLON expr DEL_RBRACKET DEL_COLON statement_body KW_ENDFOR DEL_SMCOLON  */
-#line 455 "myparser.y"
-                                                                                                                                                   {(yyval.str) = template("for (int %s = %s; %s < %s; %s = %s + %s) 		{\n%s\n}", (yyvsp[-12].str), (yyvsp[-9].str), (yyvsp[-12].str), (yyvsp[-7].str), (yyvsp[-12].str), (yyvsp[-12].str), (yyvsp[-5].str), (yyvsp[-2].str));}
+  case 100: /* assign_statement: identifier_expr AOP_MODASSIGN expr DEL_SMCOLON  */
+#line 469 "myparser.y"
+                                                          { (yyval.str) = template("%s %%= %s;", (yyvsp[-3].str), (yyvsp[-1].str)); }
 #line 2058 "myparser.tab.c"
     break;
 
-  case 106: /* array_int_comprehension: TK_IDENTIFIER AOP_COLONASSIGN DEL_LBRACKET expr KW_FOR TK_IDENTIFIER DEL_COLON TK_INTEGER DEL_RBRACKET DEL_COLON types DEL_SMCOLON  */
-#line 459 "myparser.y"
-                                                                                                                                     {(yyval.str) = template("%s* %s = (%s*)malloc(%s*sizeof(%s));\nfor(%s %s = 0; %s < %s; ++%s) {\n %s[%s] = %s;\n}", (yyvsp[-1].str), (yyvsp[-11].str), (yyvsp[-1].str), (yyvsp[-4].str), (yyvsp[-1].str), (yyvsp[-1].str), (yyvsp[-6].str), (yyvsp[-6].str), (yyvsp[-4].str), (yyvsp[-6].str), (yyvsp[-11].str), (yyvsp[-6].str), (yyvsp[-8].str));}
+  case 101: /* if_statement: KW_IF DEL_LPAR expr DEL_RPAR DEL_COLON statement_body KW_ENDIF DEL_SMCOLON  */
+#line 474 "myparser.y"
+                                                                                     {(yyval.str) = template("if (%s) {\n%s\n}", (yyvsp[-5].str), (yyvsp[-2].str));}
 #line 2064 "myparser.tab.c"
     break;
 
+  case 102: /* if_statement: KW_IF DEL_LPAR expr DEL_RPAR DEL_COLON statement_body KW_ELSE DEL_COLON statements KW_ENDIF DEL_SMCOLON  */
+#line 475 "myparser.y"
+                                                                                                                  {(yyval.str) = template("if (%s) {\n%s\n} else {\n%s\n}", (yyvsp[-8].str), (yyvsp[-5].str), (yyvsp[-2].str));}
+#line 2070 "myparser.tab.c"
+    break;
+
+  case 103: /* while_statement: KW_WHILE DEL_LPAR expr DEL_RPAR DEL_COLON statement_body KW_ENDWHILE DEL_SMCOLON  */
+#line 480 "myparser.y"
+                                                                                           { (yyval.str) = template("while (%s)\n\t%s", (yyvsp[-5].str), (yyvsp[-2].str)); }
+#line 2076 "myparser.tab.c"
+    break;
+
+  case 104: /* for_statement: KW_FOR TK_IDENTIFIER KW_IN DEL_LBRACKET expr DEL_COLON expr DEL_RBRACKET DEL_COLON statement_body KW_ENDFOR DEL_SMCOLON  */
+#line 484 "myparser.y"
+                                                                                                                                  {(yyval.str) = template("for (int %s = %s; %s < %s; %s++) {\n%s\n}", (yyvsp[-10].str), (yyvsp[-7].str), (yyvsp[-10].str), (yyvsp[-5].str), (yyvsp[-10].str), (yyvsp[-2].str));}
+#line 2082 "myparser.tab.c"
+    break;
+
+  case 105: /* for_statement: KW_FOR TK_IDENTIFIER KW_IN DEL_LBRACKET expr DEL_COLON expr DEL_COLON expr DEL_RBRACKET DEL_COLON statement_body KW_ENDFOR DEL_SMCOLON  */
+#line 485 "myparser.y"
+                                                                                                                                                   {(yyval.str) = template("for (int %s = %s; %s < %s; %s = %s + %s) 		{\n%s\n}", (yyvsp[-12].str), (yyvsp[-9].str), (yyvsp[-12].str), (yyvsp[-7].str), (yyvsp[-12].str), (yyvsp[-12].str), (yyvsp[-5].str), (yyvsp[-2].str));}
+#line 2088 "myparser.tab.c"
+    break;
+
+  case 106: /* array_int_comprehension: TK_IDENTIFIER AOP_COLONASSIGN DEL_LBRACKET expr KW_FOR TK_IDENTIFIER DEL_COLON TK_INTEGER DEL_RBRACKET DEL_COLON types DEL_SMCOLON  */
+#line 489 "myparser.y"
+                                                                                                                                     {(yyval.str) = template("%s* %s = (%s*)malloc(%s*sizeof(%s));\nfor(%s %s = 0; %s < %s; ++%s) {\n %s[%s] = %s;\n}", (yyvsp[-1].str), (yyvsp[-11].str), (yyvsp[-1].str), (yyvsp[-4].str), (yyvsp[-1].str), (yyvsp[-1].str), (yyvsp[-6].str), (yyvsp[-6].str), (yyvsp[-4].str), (yyvsp[-6].str), (yyvsp[-11].str), (yyvsp[-6].str), (yyvsp[-8].str));}
+#line 2094 "myparser.tab.c"
+    break;
+
   case 107: /* array_comprehension: TK_IDENTIFIER AOP_COLONASSIGN DEL_LBRACKET expr KW_FOR TK_IDENTIFIER DEL_COLON types KW_IN TK_IDENTIFIER KW_OF TK_INTEGER DEL_RBRACKET DEL_COLON types DEL_SMCOLON  */
-#line 465 "myparser.y"
+#line 495 "myparser.y"
         {
 	char* replaced_expr = replace_str((yyvsp[-12].str), (yyvsp[-10].str), template("%s[%s_i]", (yyvsp[-6].str), (yyvsp[-6].str)));
 	(yyval.str) = template("%s* %s = (%s*)malloc(%s*sizeof(%s));\nfor(int %s_i = 0; %s_i < %s; ++%s_i) {\n\t%s[%s_i] = %s;\n}", (yyvsp[-1].str), (yyvsp[-15].str), (yyvsp[-1].str), (yyvsp[-4].str), (yyvsp[-1].str), (yyvsp[-6].str), (yyvsp[-6].str), (yyvsp[-4].str), (yyvsp[-6].str), (yyvsp[-15].str), (yyvsp[-6].str), replaced_expr);
 	}
-#line 2073 "myparser.tab.c"
-    break;
-
-  case 108: /* break_statement: KW_BREAK DEL_SMCOLON  */
-#line 472 "myparser.y"
-                       {(yyval.str) = template("break;");}
-#line 2079 "myparser.tab.c"
-    break;
-
-  case 109: /* continue_statement: KW_CONTINUE DEL_SMCOLON  */
-#line 476 "myparser.y"
-                          {(yyval.str) = template("continue;");}
-#line 2085 "myparser.tab.c"
-    break;
-
-  case 110: /* return_statement: KW_RETURN DEL_SMCOLON  */
-#line 480 "myparser.y"
-                       {(yyval.str) = template("return;");}
-#line 2091 "myparser.tab.c"
-    break;
-
-  case 111: /* return_statement: KW_RETURN expr DEL_SMCOLON  */
-#line 481 "myparser.y"
-                              {(yyval.str) = template("return %s;", (yyvsp[-1].str));}
-#line 2097 "myparser.tab.c"
-    break;
-
-  case 112: /* function_statement: TK_IDENTIFIER DEL_LPAR DEL_RPAR  */
-#line 486 "myparser.y"
-                                  {(yyval.str) = template("%s()", (yyvsp[-2].str));}
 #line 2103 "myparser.tab.c"
     break;
 
-  case 113: /* function_statement: TK_IDENTIFIER DEL_LPAR function_arguments DEL_RPAR  */
-#line 487 "myparser.y"
-                                                       {(yyval.str) = template("%s(%s)", (yyvsp[-3].str),(yyvsp[-1].str));}
+  case 108: /* break_statement: KW_BREAK DEL_SMCOLON  */
+#line 502 "myparser.y"
+                       {(yyval.str) = template("break;");}
 #line 2109 "myparser.tab.c"
     break;
 
-  case 114: /* function_arguments: expr  */
-#line 491 "myparser.y"
-       { (yyval.str) = template("%s", (yyvsp[0].str));}
+  case 109: /* continue_statement: KW_CONTINUE DEL_SMCOLON  */
+#line 506 "myparser.y"
+                          {(yyval.str) = template("continue;");}
 #line 2115 "myparser.tab.c"
     break;
 
-  case 115: /* function_arguments: expr DEL_COMMA function_arguments  */
-#line 492 "myparser.y"
-                                      { (yyval.str) = template("%s, %s", (yyvsp[-2].str), (yyvsp[0].str)); }
+  case 110: /* return_statement: KW_RETURN DEL_SMCOLON  */
+#line 510 "myparser.y"
+                       {(yyval.str) = template("return;");}
 #line 2121 "myparser.tab.c"
     break;
 
+  case 111: /* return_statement: KW_RETURN expr DEL_SMCOLON  */
+#line 511 "myparser.y"
+                              {(yyval.str) = template("return %s;", (yyvsp[-1].str));}
+#line 2127 "myparser.tab.c"
+    break;
 
-#line 2125 "myparser.tab.c"
+  case 112: /* function_statement: TK_IDENTIFIER DEL_LPAR DEL_RPAR  */
+#line 516 "myparser.y"
+                                  {(yyval.str) = template("%s()", (yyvsp[-2].str));}
+#line 2133 "myparser.tab.c"
+    break;
+
+  case 113: /* function_statement: TK_IDENTIFIER DEL_LPAR function_arguments DEL_RPAR  */
+#line 517 "myparser.y"
+                                                       {(yyval.str) = template("%s(%s)", (yyvsp[-3].str),(yyvsp[-1].str));}
+#line 2139 "myparser.tab.c"
+    break;
+
+  case 114: /* function_arguments: expr  */
+#line 521 "myparser.y"
+       { (yyval.str) = template("%s", (yyvsp[0].str));}
+#line 2145 "myparser.tab.c"
+    break;
+
+  case 115: /* function_arguments: expr DEL_COMMA function_arguments  */
+#line 522 "myparser.y"
+                                      { (yyval.str) = template("%s, %s", (yyvsp[-2].str), (yyvsp[0].str)); }
+#line 2151 "myparser.tab.c"
+    break;
+
+
+#line 2155 "myparser.tab.c"
 
       default: break;
     }
@@ -2314,7 +2344,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 497 "myparser.y"
+#line 527 "myparser.y"
 
 /******************************************* CODE SECTION *******************************************/
 

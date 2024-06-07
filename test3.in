@@ -13,7 +13,7 @@ comp Coordinates:
 	def printt(n: integer , s : str): writeStr("5"); enddef;
 endcomp;
 
-const Nig = 123.5 : scalar;
+const Num = 123.5 : scalar;
 maxN: integer;
 
 @defmacro N 200
