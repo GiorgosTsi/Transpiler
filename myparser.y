@@ -8,8 +8,7 @@
 extern int yylex(void);
 extern int line_num;
 
-char ** comp_functions =  NULL;
-int comp_num_functions = 0;
+char* all_funcs = NULL;
 
 
 /*Used in array comprehension , to get the new expression with replaced elm->array[array_i] */
@@ -270,8 +269,6 @@ types:
 	
 identifier:
     identifier_expr // used for simple TK_IDENTIFIER , ARRAY with expression or identifier for size .
-    //  TK_IDENTIFIER { $$ = $1; }
-    //| TK_IDENTIFIER DEL_LBRACKET TK_INTEGER DEL_RBRACKET {$$ = template("%s[%s]", $1, $3);};
     | TK_IDENTIFIER DEL_LBRACKET DEL_RBRACKET {$$ = template("*%s", $1);};
     | identifier DEL_COMMA  TK_IDENTIFIER { $$ = template("%s, %s" , $1 , $3); }
     | identifier DEL_COMMA  TK_IDENTIFIER DEL_LBRACKET TK_INTEGER DEL_RBRACKET { $$ = template("%s, %s[%s]" , $1 , $3 , $5); }
@@ -284,18 +281,11 @@ identifier:
 comp:
     KW_COMP TK_IDENTIFIER DEL_COLON comp_body KW_ENDCOMP DEL_SMCOLON 
     {
-       char* all_funcs = NULL;
-      /*
-       for(int i=0 ; i < comp_num_functions ; i++){
-          char* func = comp_functions[i];
-          all_funcs = (char*)realloc(all_funcs , sizeof(char) * (strlen(all_funcs) + strlen(func) + 2) );
-          all_funcs[strlen(all_funcs) -2 ] = '\n';
-          all_funcs[strlen(all_funcs) -1 ] = '\n';   
-       }
-       */
-       char * one_func = comp_functions[1];
-       $$ = template("\n#define SELF struct %s *self\n\ntypedef struct %s {\n%s\n} %s;\n%s\n\n#undef SELF\n", $2, $2, $4, $2 , one_func); 
-       comp_num_functions = 0;
+       $$ = template("\n#define SELF struct %s *self\n\ntypedef struct %s {\n%s\n} %s;\n%s\n\n#undef SELF\n", $2, $2, $4, $2 , all_funcs); 
+       // reset the all_funcs string , to get new funcs on the next comp and dont rewrite the old ones.
+       free(all_funcs);
+       all_funcs = strdup("");
+       
     }
 	  ;
 
@@ -325,28 +315,41 @@ comp_identifiers:
 comp_function:
     KW_DEF TK_IDENTIFIER DEL_LPAR params DEL_RPAR DEL_COLON func_body KW_ENDDEF DEL_SMCOLON 								
     {
-      char *func_declaration = template("void (*%s)(SELF %s%s)", $2, ( ($4[0] != '\0') ? ", " : "" ) , $4);
-      char *func_definition = template("void %s(SELF %s%s) {\n%s\n}\n", $2, ( ($4[0] != '\0') ? ", " : "" ),$4, $7);
-      comp_num_functions++;
-       
-      comp_functions = (char**)realloc(comp_functions , comp_num_functions * sizeof(char*));
+      char *func_declaration = template("void (*%s)(SELF %s%s)\n", $2, ( ($4[0] != '\0') ? ", " : "" ) , $4);
       
-      comp_functions[comp_num_functions - 1] = (char*)malloc(sizeof(char) * strlen(func_definition));
-      comp_functions[comp_num_functions - 1] = strdup(func_definition);
+      char *func;
+      func = template("void %s(SELF %s%s) {\n%s\n}\n", $2, ( ($4[0] != '\0') ? ", " : "" ),$4, $7);
+      size_t new_size = all_funcs ? strlen(all_funcs) + strlen(func) + 1 : strlen(func) + 1;
+      all_funcs = (char*)realloc(all_funcs, new_size);
+      if (all_funcs) {
+          if (strlen(all_funcs) > 0) {
+            strcat(all_funcs, "\n");
+          }
+          strcat(all_funcs, func);
+      } else {
+          all_funcs = strdup(func);
+      }
 
       $$ = template("%s;\n", func_declaration);
+      
     }
+
     | KW_DEF TK_IDENTIFIER DEL_LPAR params DEL_RPAR AOP_ARROW types DEL_COLON func_body KW_ENDDEF DEL_SMCOLON 	
     {
       char *func_declaration = template("%s (*%s)(SELF %s%s)", $7, $2, ($4[0] != '\0') ? ", " : "", $4);
-      char *func_definition = template("%s %s(SELF %s%s) {\n%s\n}\n", $7, $2, ( ($4[0] != '\0') ? ", " : "" ), $4, $9);
-      comp_num_functions++;
 
-       
-      comp_functions = (char**)realloc(comp_functions , comp_num_functions * sizeof(char*));
-      
-      comp_functions[comp_num_functions - 1] = (char*)malloc(sizeof(char) * strlen(func_definition));
-      comp_functions[comp_num_functions - 1] = strdup(func_definition);
+      char *func;
+      func = template("%s %s(SELF %s%s) {\n%s\n}\n", $7, $2, ( ($4[0] != '\0') ? ", " : "" ), $4, $9);
+      size_t new_size = all_funcs ? strlen(all_funcs) + strlen(func) + 1 : strlen(func) + 1;
+      all_funcs = (char*)realloc(all_funcs, new_size);
+      if (all_funcs) {
+        if (strlen(all_funcs) > 0) {
+          strcat(all_funcs, "\n");
+        }
+        strcat(all_funcs, func);
+      } else {
+        all_funcs = strdup(func);
+      }
 
       $$ = template("%s;\n", func_declaration);
     }
