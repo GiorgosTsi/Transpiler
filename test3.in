@@ -37,7 +37,8 @@ def main( ) :
 	x2 , arr[] : integer;
 	arr[5] , x : integer;
 	x : integer ;
-	z,h[] : Coordinates ;
+	x : Example;
+	z,h : Coordinates ;
 	x , y[5] : scalar;
 	x = N; --will be replaced by 200
 	const AA = 100+234 / 5 : scalar;

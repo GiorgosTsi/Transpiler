@@ -9,6 +9,7 @@ extern int yylex(void);
 extern int line_num;
 
 char* all_funcs = NULL;
+char* all_funcs_names = NULL;
 
 
 /*Used in array comprehension , to get the new expression with replaced elm->array[array_i] 
@@ -43,6 +44,10 @@ char* replace_str(const char *str, const char *old, const char *new) {
 
     result[i] = '\0';
     return result;
+}
+
+int is_basic_data_type(const char *type) {
+    return strcmp(type, "int") == 0 || strcmp(type, "double") == 0 || strcmp(type, "char*") == 0 || strcmp(type, "int") == 0;
 }
 
 %}
@@ -254,7 +259,36 @@ main_func:
 /************************* Variable Declaration *************************/ 
 
 variable_declaration:
-  identifier DEL_COLON types DEL_SMCOLON { $$ = template("%s %s;", $3, $1); }
+  identifier DEL_COLON types DEL_SMCOLON
+   {
+    // if its a basic data type then declare it as normal : i.e int x;
+    if (is_basic_data_type($3)) 
+      $$ = template("%s %s;", $3, $1);
+    //if it is a complex type declare it as: i.e Coordinates x = ctor_Coordinates ;
+    else{ 
+      char* token = strtok($1, ", ");
+      char* final_str = strdup("");
+      int first = 1;
+
+      while (token != NULL) {
+        char* new_str = template("%s = ctor_%s", token, $3);
+
+        if (first) {
+            first = 0;
+            final_str = template("%s%s", final_str, new_str);
+        } else {
+            final_str = template("%s, %s", final_str, new_str);
+        }
+
+        free(new_str);
+        token = strtok(NULL, ", ");
+      }
+
+      char* final_result = template("%s;", final_str);
+      free(final_str);
+      $$ = final_result;
+    }
+   }
     
 
 basic_data_type:
@@ -283,10 +317,12 @@ identifier:
 comp:
     KW_COMP TK_IDENTIFIER DEL_COLON comp_body KW_ENDCOMP DEL_SMCOLON 
     {
-       $$ = template("\n#define SELF struct %s *self\n\ntypedef struct %s {\n%s\n} %s;\n%s\n\n#undef SELF\n", $2, $2, $4, $2 , all_funcs); 
+       $$ = template("\n#define SELF struct %s *self\n\ntypedef struct %s {\n%s\n} %s;\n%s\nconst %s ctor_%s = { %s };\n#undef SELF\n", $2, $2, $4, $2 , all_funcs , $2 , $2 , all_funcs_names); 
+    
        // reset the all_funcs string , to get new funcs on the next comp and dont rewrite the old ones.
        free(all_funcs);
-       all_funcs = strdup("");
+       all_funcs = NULL;
+       all_funcs_names = NULL;
        
     }
 	  ;
@@ -317,12 +353,12 @@ comp_identifiers:
 comp_function:
     KW_DEF TK_IDENTIFIER DEL_LPAR params DEL_RPAR DEL_COLON func_body KW_ENDDEF DEL_SMCOLON 								
     {
-      char *func_declaration = template("void (*%s)(SELF %s%s)\n", $2, ( ($4[0] != '\0') ? ", " : "" ) , $4);
+      char *func_declaration = template("void (*%s)(SELF %s%s)", $2, ( ($4[0] != '\0') ? ", " : "" ) , $4);
       
       char * func = template("void %s(SELF %s%s) {\n%s\n}\n", $2, ( ($4[0] != '\0') ? ", " : "" ),$4, $7);
 
+      /*1. Store func body: */
       //replace all #var with self->var:
-
       func = replace_str(func , "#" , "self->" );
       size_t new_size = all_funcs ? strlen(all_funcs) + strlen(func) + 1 : strlen(func) + 1;
       all_funcs = (char*)realloc(all_funcs, new_size);
@@ -335,6 +371,19 @@ comp_function:
           all_funcs = strdup(func);
       }
 
+      /*2. Store func name: */
+      char* func_name = template(".%s=%s" , $2 , $2);
+      size_t size = all_funcs_names ? strlen(all_funcs_names) + strlen(func_name) + 1 : strlen(func_name) + 1;
+      all_funcs_names = (char*)realloc(all_funcs_names, size);
+      if (all_funcs_names) {
+          if (strlen(all_funcs_names) > 0) {
+            strcat(all_funcs_names, "\n");
+          }
+          strcat(all_funcs_names, func_name);
+      } else {
+          all_funcs_names = strdup(func_name);
+      }
+
       $$ = template("%s;\n", func_declaration);
       
     }
@@ -344,10 +393,11 @@ comp_function:
       char *func_declaration = template("%s (*%s)(SELF %s%s)", $7, $2, ($4[0] != '\0') ? ", " : "", $4);
 
       char *func = template("%s %s(SELF %s%s) {\n%s\n}\n", $7, $2, ( ($4[0] != '\0') ? ", " : "" ), $4, $9);
+      
+      
+      /*1. Store func body: */
       //replace all #var with self->var:
-
       func = replace_str(func , "#" , "self->" );
-
       size_t new_size = all_funcs ? strlen(all_funcs) + strlen(func) + 1 : strlen(func) + 1;
       all_funcs = (char*)realloc(all_funcs, new_size);
       if (all_funcs) {
@@ -357,6 +407,19 @@ comp_function:
         strcat(all_funcs, func);
       } else {
         all_funcs = strdup(func);
+      }
+
+      /*2. Store func name: */
+      char* func_name = template(".%s=%s" , $2 , $2);
+      size_t size = all_funcs_names ? strlen(all_funcs_names) + strlen(func_name) + 1 : strlen(func_name) + 1;
+      all_funcs_names = (char*)realloc(all_funcs_names, size);
+      if (all_funcs_names) {
+          if (strlen(all_funcs_names) > 0) {
+            strcat(all_funcs_names, "\n");
+          }
+          strcat(all_funcs_names, func_name);
+      } else {
+          all_funcs_names = strdup(func_name);
       }
 
       $$ = template("%s;\n", func_declaration);

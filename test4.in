@@ -1,0 +1,21 @@
+comp Coordinates:
+	#arr[5] , #x : integer;
+	
+	def area() -> scalar: return 3.14 * (#radius ** 2); enddef;
+	def move(dx: scalar, dy: scalar): #x=#x+dx; #y=#y+dx; enddef;
+	def printt(n: integer , s : str): writeStr("5"); enddef;
+
+endcomp;
+
+comp Example:
+	#x : integer;
+
+	def print(): writeStr(#x); enddef;
+endcomp;
+
+
+def main( ) :
+	x : Example;
+	z,h : Coordinates ;
+	a[2] = "str";
+enddef;
