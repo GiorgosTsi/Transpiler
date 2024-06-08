@@ -11,7 +11,9 @@ extern int line_num;
 char* all_funcs = NULL;
 
 
-/*Used in array comprehension , to get the new expression with replaced elm->array[array_i] */
+/*Used in array comprehension , to get the new expression with replaced elm->array[array_i] 
+  And also in the comp_functions to replace #var with self->var
+*/
 char* replace_str(const char *str, const char *old, const char *new) {
     char *result;
     int i, cnt = 0;
@@ -317,8 +319,11 @@ comp_function:
     {
       char *func_declaration = template("void (*%s)(SELF %s%s)\n", $2, ( ($4[0] != '\0') ? ", " : "" ) , $4);
       
-      char *func;
-      func = template("void %s(SELF %s%s) {\n%s\n}\n", $2, ( ($4[0] != '\0') ? ", " : "" ),$4, $7);
+      char * func = template("void %s(SELF %s%s) {\n%s\n}\n", $2, ( ($4[0] != '\0') ? ", " : "" ),$4, $7);
+
+      //replace all #var with self->var:
+
+      func = replace_str(func , "#" , "self->" );
       size_t new_size = all_funcs ? strlen(all_funcs) + strlen(func) + 1 : strlen(func) + 1;
       all_funcs = (char*)realloc(all_funcs, new_size);
       if (all_funcs) {
@@ -338,8 +343,11 @@ comp_function:
     {
       char *func_declaration = template("%s (*%s)(SELF %s%s)", $7, $2, ($4[0] != '\0') ? ", " : "", $4);
 
-      char *func;
-      func = template("%s %s(SELF %s%s) {\n%s\n}\n", $7, $2, ( ($4[0] != '\0') ? ", " : "" ), $4, $9);
+      char *func = template("%s %s(SELF %s%s) {\n%s\n}\n", $7, $2, ( ($4[0] != '\0') ? ", " : "" ), $4, $9);
+      //replace all #var with self->var:
+
+      func = replace_str(func , "#" , "self->" );
+
       size_t new_size = all_funcs ? strlen(all_funcs) + strlen(func) + 1 : strlen(func) + 1;
       all_funcs = (char*)realloc(all_funcs, new_size);
       if (all_funcs) {
@@ -392,7 +400,7 @@ arithmetic_expr:
 
 identifier_expr:
    TK_IDENTIFIER { $$ = $1; }
-  | HASH TK_IDENTIFIER { {$$ = template("%s", $2);} }
+  | HASH TK_IDENTIFIER { {$$ = template("#%s", $2);} }
   | TK_IDENTIFIER DEL_LBRACKET TK_IDENTIFIER DEL_RBRACKET { $$ = template("%s[%s]", $1, $3); }
   | TK_IDENTIFIER DEL_LBRACKET arithmetic_expr DEL_RBRACKET { $$ = template("%s[%s]", $1, $3); }
   ;
@@ -424,10 +432,10 @@ function:
 
 params: 
   %empty { $$ = "" ;}
-  | TK_IDENTIFIER DEL_COLON basic_data_type {$$ = template("%s %s", $3, $1);}
-  | TK_IDENTIFIER DEL_COLON basic_data_type DEL_COMMA params {$$ = template("%s %s, %s", $3, $1, $5);};
-  | TK_IDENTIFIER DEL_LBRACKET DEL_RBRACKET DEL_COLON basic_data_type {$$ = template("%s *%s", $5, $1);}
-  | TK_IDENTIFIER DEL_LBRACKET DEL_RBRACKET DEL_COLON basic_data_type DEL_COMMA params{$$ = template("%s *%s, %s", $5, $1, $7);}
+  | TK_IDENTIFIER DEL_COLON types {$$ = template("%s %s", $3, $1);}
+  | TK_IDENTIFIER DEL_COLON types DEL_COMMA params {$$ = template("%s %s, %s", $3, $1, $5);};
+  | TK_IDENTIFIER DEL_LBRACKET DEL_RBRACKET DEL_COLON types {$$ = template("%s *%s", $5, $1);}
+  | TK_IDENTIFIER DEL_LBRACKET DEL_RBRACKET DEL_COLON types DEL_COMMA params{$$ = template("%s *%s, %s", $5, $1, $7);}
   ;
   
 func_body:
@@ -475,7 +483,7 @@ assign_statement:
 
 if_statement:
 	  KW_IF DEL_LPAR expr DEL_RPAR DEL_COLON statement_body KW_ENDIF DEL_SMCOLON {$$ = template("if (%s) {\n%s\n}", $3, $6);}
-	| KW_IF DEL_LPAR expr DEL_RPAR DEL_COLON statement_body KW_ELSE DEL_COLON statements KW_ENDIF DEL_SMCOLON {$$ = template("if (%s) {\n%s\n} else {\n%s\n}", $3, $6, $9);}
+	| KW_IF DEL_LPAR expr DEL_RPAR DEL_COLON statement_body KW_ELSE DEL_COLON statement_body KW_ENDIF DEL_SMCOLON {$$ = template("if (%s) {\n%s\n} else {\n%s\n}", $3, $6, $9);}
 	;
   
  
