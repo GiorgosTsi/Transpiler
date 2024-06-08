@@ -17,5 +17,12 @@ endcomp;
 def main( ) :
 	x : Example;
 	z,h : Coordinates ;
-	a[2] = "str";
+
+    z.x = 5;
+    z.y.x = 8;
+    c[i].x = 8;
+    c[i].x.area(x,y);
+    x.printt();
+    h = x.y.z.area();
+	
 enddef;

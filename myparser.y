@@ -284,7 +284,7 @@ variable_declaration:
         token = strtok(NULL, ", ");
       }
 
-      char* final_result = template("%s;", final_str);
+      char* final_result = template("%s %s;",$3, final_str );
       free(final_str);
       $$ = final_result;
     }
@@ -377,7 +377,7 @@ comp_function:
       all_funcs_names = (char*)realloc(all_funcs_names, size);
       if (all_funcs_names) {
           if (strlen(all_funcs_names) > 0) {
-            strcat(all_funcs_names, "\n");
+            strcat(all_funcs_names, ",");
           }
           strcat(all_funcs_names, func_name);
       } else {
@@ -415,7 +415,7 @@ comp_function:
       all_funcs_names = (char*)realloc(all_funcs_names, size);
       if (all_funcs_names) {
           if (strlen(all_funcs_names) > 0) {
-            strcat(all_funcs_names, "\n");
+            strcat(all_funcs_names, ",");
           }
           strcat(all_funcs_names, func_name);
       } else {
@@ -465,10 +465,11 @@ identifier_expr:
    TK_IDENTIFIER { $$ = $1; }
   | HASH TK_IDENTIFIER { {$$ = template("#%s", $2);} }
   | TK_IDENTIFIER DEL_LBRACKET TK_IDENTIFIER DEL_RBRACKET { $$ = template("%s[%s]", $1, $3); }
+  | HASH TK_IDENTIFIER DEL_LBRACKET identifier_expr DEL_RBRACKET { $$ = template("#%s[%s]", $2, $4); } // used for #x[#y] = ..
   | TK_IDENTIFIER DEL_LBRACKET arithmetic_expr DEL_RBRACKET { $$ = template("%s[%s]", $1, $3); }
+  | identifier_expr DEL_DOT HASH TK_IDENTIFIER {$$ = template("%s.%s" , $1 , $4 ); } // used for : comp.comp_members
   ;
-
-
+  
 relational_expr:
   expr ROP_LESS expr {$$ = template("%s < %s",$1, $3);}
   | expr ROP_LESSEQUALS expr {$$ = template("%s <= %s", $1, $3);}
@@ -484,12 +485,11 @@ logical_statements:
     | expr KW_OR expr {$$ = template("%s || %s", $1, $3);}
     ;
 
-
 /************************* Function Declaration *************************/ 
 
 function: 
   KW_DEF TK_IDENTIFIER DEL_LPAR params DEL_RPAR DEL_COLON func_body KW_ENDDEF DEL_SMCOLON 								{$$ = template("\nvoid %s(%s) {\n%s\n}\n", $2, $4, $7);}
-  | KW_DEF TK_IDENTIFIER DEL_LPAR params DEL_RPAR AOP_ARROW basic_data_type DEL_COLON func_body KW_ENDDEF DEL_SMCOLON 	{$$ = template("\n%s %s(%s) {\n%s\n\n}\n", $7, $2, $4, $9);}
+  | KW_DEF TK_IDENTIFIER DEL_LPAR params DEL_RPAR AOP_ARROW types DEL_COLON func_body KW_ENDDEF DEL_SMCOLON 	{$$ = template("\n%s %s(%s) {\n%s\n\n}\n", $7, $2, $4, $9);}
   ;
 
 
@@ -589,6 +589,8 @@ return_statement:
 function_statement:
   TK_IDENTIFIER DEL_LPAR DEL_RPAR {$$ = template("%s()", $1);}
   | TK_IDENTIFIER DEL_LPAR function_arguments DEL_RPAR {$$ = template("%s(%s)", $1,$3);}
+  | identifier_expr DEL_DOT TK_IDENTIFIER DEL_LPAR DEL_RPAR {$$ = template("%s.%s(&(%s))" , $1 , $3 ,$1); }
+  | identifier_expr DEL_DOT TK_IDENTIFIER DEL_LPAR function_arguments DEL_RPAR {$$ = template("%s.%s(&(%s),%s)" , $1 , $3 ,$1, $5); }
   ;
 
 function_arguments:
