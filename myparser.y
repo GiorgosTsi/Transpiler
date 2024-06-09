@@ -342,10 +342,10 @@ comp_field:
 
 comp_identifiers:
       HASH TK_IDENTIFIER { $$ = $2; }
-    | HASH TK_IDENTIFIER DEL_LBRACKET TK_INTEGER DEL_RBRACKET {$$ = template("%s[%s]", $2, $4);};
+    | HASH TK_IDENTIFIER DEL_LBRACKET expr DEL_RBRACKET {$$ = template("%s[%s]", $2, $4);};
     | HASH TK_IDENTIFIER DEL_LBRACKET DEL_RBRACKET {$$ = template("*%s", $2);};
     | comp_identifiers DEL_COMMA HASH TK_IDENTIFIER { $$ = template("%s, %s" , $1 , $4); }
-    | comp_identifiers DEL_COMMA HASH TK_IDENTIFIER DEL_LBRACKET TK_INTEGER DEL_RBRACKET { $$ = template("%s, %s[%s]" , $1 , $4 , $6); }
+    | comp_identifiers DEL_COMMA HASH TK_IDENTIFIER DEL_LBRACKET expr DEL_RBRACKET { $$ = template("%s, %s[%s]" , $1 , $4 , $6); }
     | comp_identifiers DEL_COMMA HASH TK_IDENTIFIER DEL_LBRACKET DEL_RBRACKET { $$ = template("%s, *%s" , $1 , $4 ); }
 	  ;
 
@@ -462,12 +462,12 @@ arithmetic_expr:
 
 
 identifier_expr:
-   TK_IDENTIFIER { $$ = $1; }
-  | HASH TK_IDENTIFIER { {$$ = template("#%s", $2);} }
-  | TK_IDENTIFIER DEL_LBRACKET TK_IDENTIFIER DEL_RBRACKET { $$ = template("%s[%s]", $1, $3); }
-  | HASH TK_IDENTIFIER DEL_LBRACKET identifier_expr DEL_RBRACKET { $$ = template("#%s[%s]", $2, $4); } // used for #x[#y] = ..
-  | TK_IDENTIFIER DEL_LBRACKET arithmetic_expr DEL_RBRACKET { $$ = template("%s[%s]", $1, $3); }
-  | identifier_expr DEL_DOT HASH TK_IDENTIFIER {$$ = template("%s.%s" , $1 , $4 ); } // used for : comp.comp_members
+   TK_IDENTIFIER { $$ = $1; } // used for x = 5 assign statements
+  | HASH TK_IDENTIFIER { {$$ = template("#%s", $2);} } // used for #x = .. assign statements in comp funcs body
+  | TK_IDENTIFIER DEL_LBRACKET expr DEL_RBRACKET { $$ = template("%s[%s]", $1, $3); } // used for arr[expr] = .. assign statements
+  | HASH TK_IDENTIFIER DEL_LBRACKET expr DEL_RBRACKET { $$ = template("#%s[%s]", $2, $4); } // used for #x[#y] = ..
+  | identifier_expr DEL_DOT HASH TK_IDENTIFIER {$$ = template("%s.%s" , $1 , $4 ); } // used for : #comp.#comp_members in comp funcs
+  | identifier_expr DEL_DOT TK_IDENTIFIER {$$ = template("%s.%s" , $1 , $3 ); } // used in main functions for x.y = .. statements
   ;
   
 relational_expr:
@@ -551,7 +551,7 @@ if_statement:
   
  
 while_statement:
-	  KW_WHILE DEL_LPAR expr DEL_RPAR DEL_COLON statement_body KW_ENDWHILE DEL_SMCOLON { $$ = template("while (%s)\n\t%s", $3, $6); }
+	  KW_WHILE DEL_LPAR expr DEL_RPAR DEL_COLON statement_body KW_ENDWHILE DEL_SMCOLON { $$ = template("while (%s){\n%s\n}\n", $3, $6); }
 	  
 	  
 for_statement:
@@ -589,8 +589,8 @@ return_statement:
 function_statement:
   TK_IDENTIFIER DEL_LPAR DEL_RPAR {$$ = template("%s()", $1);}
   | TK_IDENTIFIER DEL_LPAR function_arguments DEL_RPAR {$$ = template("%s(%s)", $1,$3);}
-  | identifier_expr DEL_DOT TK_IDENTIFIER DEL_LPAR DEL_RPAR {$$ = template("%s.%s(&(%s))" , $1 , $3 ,$1); }
-  | identifier_expr DEL_DOT TK_IDENTIFIER DEL_LPAR function_arguments DEL_RPAR {$$ = template("%s.%s(&(%s),%s)" , $1 , $3 ,$1, $5); }
+  | identifier_expr DEL_DOT TK_IDENTIFIER DEL_LPAR DEL_RPAR {$$ = template("%s.%s(&%s)" , $1 , $3 ,$1); }
+  | identifier_expr DEL_DOT TK_IDENTIFIER DEL_LPAR function_arguments DEL_RPAR {$$ = template("%s.%s(&%s,%s)" , $1 , $3 ,$1, $5); }
   ;
 
 function_arguments:
