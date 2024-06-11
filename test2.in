@@ -31,7 +31,7 @@ comp Coordinates:
 	#longtitude : integer;
 	#string : str;
 	#x1 , #y1 : integer;
-	def area() -> scalar: return 3.14 * (#radius ** 2); enddef;
+	--def area() -> scalar: return 3.14 * (#radius ** 2); enddef;
 
 endcomp;
 

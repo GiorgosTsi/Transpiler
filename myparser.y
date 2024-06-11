@@ -10,6 +10,7 @@ extern int line_num;
 
 char* all_funcs = NULL;
 char* all_funcs_names = NULL;
+char* all_comp_object_members = NULL;
 
 
 /*Used in array comprehension , to get the new expression with replaced elm->array[array_i] 
@@ -317,12 +318,13 @@ identifier:
 comp:
     KW_COMP TK_IDENTIFIER DEL_COLON comp_body KW_ENDCOMP DEL_SMCOLON 
     {
-       $$ = template("\n#define SELF struct %s *self\n\ntypedef struct %s {\n%s\n} %s;\n%s\nconst %s ctor_%s = { %s };\n#undef SELF\n", $2, $2, $4, $2 , all_funcs , $2 , $2 , all_funcs_names); 
+       $$ = template("\n#define SELF struct %s *self\n\ntypedef struct %s {\n%s\n} %s;\n%s\nconst %s ctor_%s = { %s  %s%s };\n#undef SELF\n", $2, $2, $4, $2 ,( all_funcs ? all_funcs : "" ), $2 , $2 , (all_funcs_names ? all_funcs_names : "" ) ,(all_comp_object_members ? ", " : "") , (all_comp_object_members ? all_comp_object_members : "")); 
     
        // reset the all_funcs string , to get new funcs on the next comp and dont rewrite the old ones.
        free(all_funcs);
        all_funcs = NULL;
        all_funcs_names = NULL;
+       all_comp_object_members = NULL;
        
     }
 	  ;
@@ -335,7 +337,37 @@ comp_body:
 
 
 comp_field:
-    comp_identifiers DEL_COLON types DEL_SMCOLON { $$ = template("%s %s;", $3, $1); }
+    comp_identifiers DEL_COLON types DEL_SMCOLON 
+    { 
+      $$ = template("%s %s;", $3, $1); 
+
+        /* Now if it is an object and not a basic data type, we need to add it in the constructor, to initialize it: */
+        if (!is_basic_data_type($3)) {
+            char *object_name;
+            char *identifier_copy = strdup($1); // Create a copy to modify
+            char *bracket_pos = strchr(identifier_copy, '['); // Find the bracket position
+            if (bracket_pos != NULL) {  // Check if the identifier is an array
+                *bracket_pos = '\0'; // Truncate at the bracket to remove the size
+                // Create the initializer for the array
+                object_name = template(".%s = {[0 ... %s - 1] = ctor_%s}", identifier_copy, bracket_pos + 1, $3);
+            } else {
+                // Create the initializer for a regular member
+                object_name = template(".%s = ctor_%s", $1, $3);
+            }
+
+            size_t size = all_comp_object_members ? strlen(all_comp_object_members) + strlen(object_name) + 1 : strlen(object_name) + 1;
+            all_comp_object_members = (char*)realloc(all_comp_object_members, size);
+            if (all_comp_object_members) {
+                if (strlen(all_comp_object_members) > 0) {
+                    strcat(all_comp_object_members, ",");
+                }
+                strcat(all_comp_object_members, object_name);
+            } else {
+                all_comp_object_members = strdup(object_name);
+            }
+            free(identifier_copy); // Free the allocated memory
+        }
+    }
     | comp_function { $$ = template("%s", $1); }
 	  ;
 
