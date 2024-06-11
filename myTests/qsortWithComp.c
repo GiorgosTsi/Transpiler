@@ -22,7 +22,7 @@ return self->number;
 
 }
 
-const RandomNumberGenerator ctor_RandomNumberGenerator = { .next=next };
+const RandomNumberGenerator ctor_RandomNumberGenerator = { .next=next   };
 #undef SELF
 
 
@@ -41,14 +41,14 @@ if (low < high) {
 pivot = low;
 i = low;
 j = high;
-while (i < j)
-{while (a[i] <= a[pivot] && i < high)
-{i = i + 1;
+while (i < j){
+while (a[i] <= a[pivot] && i < high){
+i = i + 1;
 
 }
 
-while (a[j] > a[pivot])
-{j = j - 1;
+while (a[j] > a[pivot]){
+j = j - 1;
 
 }
 

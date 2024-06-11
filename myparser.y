@@ -48,7 +48,7 @@ char* replace_str(const char *str, const char *old, const char *new) {
 }
 
 int is_basic_data_type(const char *type) {
-    return strcmp(type, "int") == 0 || strcmp(type, "double") == 0 || strcmp(type, "char*") == 0 || strcmp(type, "int") == 0;
+    return strcmp(type, "int") == 0 || strcmp(type, "double") == 0 || strcmp(type, "StringType") == 0 ;
 }
 
 %}
@@ -295,7 +295,7 @@ variable_declaration:
 basic_data_type:
       KW_INT { $$ = template("%s", "int"); }
     | KW_SCALAR { $$ = template("%s", "double"); }
-    | KW_STR { $$ = template("%s", "char*"); }
+    | KW_STR { $$ = template("%s", "StringType"); }
     | KW_BOOLEAN { $$ = template("%s", "int"); }
 	;
 
@@ -305,10 +305,10 @@ types:
 	;
 	
 identifier:
-    identifier_expr // used for simple TK_IDENTIFIER , ARRAY with expression or identifier for size .
+    identifier_expr // used for simple TK_IDENTIFIER , ARRAY with expression .
     | TK_IDENTIFIER DEL_LBRACKET DEL_RBRACKET {$$ = template("*%s", $1);};
     | identifier DEL_COMMA  TK_IDENTIFIER { $$ = template("%s, %s" , $1 , $3); }
-    | identifier DEL_COMMA  TK_IDENTIFIER DEL_LBRACKET TK_INTEGER DEL_RBRACKET { $$ = template("%s, %s[%s]" , $1 , $3 , $5); }
+    | identifier DEL_COMMA  TK_IDENTIFIER DEL_LBRACKET expr DEL_RBRACKET { $$ = template("%s, %s[%s]" , $1 , $3 , $5); }
     | identifier DEL_COMMA  TK_IDENTIFIER DEL_LBRACKET DEL_RBRACKET { $$ = template("%s, *%s" , $1 , $3 ); }
 	;
 
@@ -341,13 +341,14 @@ comp_body:
 comp_field:
     comp_identifiers DEL_COLON types DEL_SMCOLON 
     { 
-      $$ = template("%s %s;", $3, $1); 
+        $$ = template("%s %s;", $3, $1); 
 
         /* Now if it is an object and not a basic data type, we need to add it in the constructor, to initialize it: */
         if (!is_basic_data_type($3)) {
             char *object_name;
             char *identifier_copy = strdup($1); // Create a copy to modify
             char *bracket_pos = strchr(identifier_copy, '['); // Find the bracket position
+
             if (bracket_pos != NULL) {  // Check if the identifier is an array
                 char *size_str = strdup(bracket_pos + 1); // Copy the size part
                 char *end_bracket_pos = strchr(size_str, ']'); // Find the closing bracket
@@ -363,16 +364,23 @@ comp_field:
                 object_name = template(".%s = ctor_%s", $1, $3);
             }
 
-            size_t size = all_comp_object_members ? strlen(all_comp_object_members) + strlen(object_name) + 2 : strlen(object_name) + 1;
-            all_comp_object_members = (char*)realloc(all_comp_object_members, size);
             if (all_comp_object_members) {
-                if (strlen(all_comp_object_members) > 0) {
+                // Append the new object name to the existing members
+                size_t new_size = strlen(all_comp_object_members) + strlen(object_name) + 2; // +2 for comma and null terminator
+                all_comp_object_members = (char*)realloc(all_comp_object_members, new_size);
+                if (all_comp_object_members) {
                     strcat(all_comp_object_members, ",");
+                    strcat(all_comp_object_members, object_name);
+                } else {
+                    // Handle memory allocation failure
+                    fprintf(stderr, "Memory allocation failed\n");
+                    exit(EXIT_FAILURE);
                 }
-                strcat(all_comp_object_members, object_name);
             } else {
+                // Initialize the member list with the new object name
                 all_comp_object_members = strdup(object_name);
             }
+            free(object_name); // Free the allocated memory
             free(identifier_copy); // Free the allocated memory
         }
     }

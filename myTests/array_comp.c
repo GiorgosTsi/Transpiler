@@ -3,6 +3,7 @@
 
 
 
+
 const int N = 100;
 int a[100];
 int main () {

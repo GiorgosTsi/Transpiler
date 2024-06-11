@@ -2,18 +2,21 @@
 #include "lambdalib.h"
 
 
+
+
+
 #define SELF struct Address *self
 
 typedef struct Address {
-char* street;
+StringType street;
 int number;
-char* city;
-void (*setAddress)(SELF , char* s, int n, char* c);
+StringType city;
+void (*setAddress)(SELF , StringType s, int n, StringType c);
 
 void (*printAddress)(SELF );
 
 } Address;
-void setAddress(SELF , char* s, int n, char* c) {
+void setAddress(SELF , StringType s, int n, StringType c) {
 self->street = s;
 self->number = n;
 self->city = c;
@@ -32,16 +35,16 @@ const Address ctor_Address = { .setAddress=setAddress,.printAddress=printAddress
 #define SELF struct Person *self
 
 typedef struct Person {
-char* firstName, lastName;
-char* email;
+StringType firstName, lastName;
+StringType email;
 int phone;
 Address address;
-void (*setPerson)(SELF , char* fn, char* ln, char* email, int phone, Address addr);
+void (*setPerson)(SELF , StringType fn, StringType ln, StringType email, int phone, Address addr);
 
 void (*printPersonInfo)(SELF );
 
 } Person;
-void setPerson(SELF , char* fn, char* ln, char* email, int phone, Address addr) {
+void setPerson(SELF , StringType fn, StringType ln, StringType email, int phone, Address addr) {
 self->firstName = fn;
 self->lastName = ln;
 self->email = email;
@@ -63,16 +66,16 @@ const Person ctor_Person = { .setPerson=setPerson,.printPersonInfo=printPersonIn
 #define SELF struct Book *self
 
 typedef struct Book {
-char* title, isbn;
+StringType title, isbn;
 Person author;
 int numOfCopies;
 double price;
-void (*setBook)(SELF , char* t, Person a, int numOfCopies, double price);
+void (*setBook)(SELF , StringType t, Person a, int numOfCopies, double price);
 
 void (*printBook)(SELF );
 
 } Book;
-void setBook(SELF , char* t, Person a, int numOfCopies, double price) {
+void setBook(SELF , StringType t, Person a, int numOfCopies, double price) {
 self->title = t;
 self->author = a;
 self->numOfCopies = numOfCopies;
@@ -126,7 +129,7 @@ const Order ctor_Order = { .setOrder=setOrder,.printOrder=printOrder  , .book = 
 #define SELF struct Bookstore *self
 
 typedef struct Bookstore {
-char* name;
+StringType name;
 Book listOfBooks[100];
 int numOfBooks;
 Order listOfOrders[100];
@@ -179,7 +182,7 @@ const Bookstore ctor_Bookstore = { .putOrder=putOrder,.addBook=addBook,.printBoo
 
 int orderId;
 
-Address createAddress(char* s, int n, char* c) {
+Address createAddress(StringType s, int n, StringType c) {
 Address a = ctor_Address;
 a.setAddress(&a,s, n, c);
 return a;
@@ -188,7 +191,7 @@ return a;
 }
 
 
-Person createPerson(char* fn, char* ln, char* email, int phone, Address addr) {
+Person createPerson(StringType fn, StringType ln, StringType email, int phone, Address addr) {
 Person p = ctor_Person;
 p.setPerson(&p,fn, ln, email, phone, addr);
 return p;
@@ -197,7 +200,7 @@ return p;
 }
 
 
-Book createBook(char* t, Person a, int numOfCopies, double price) {
+Book createBook(StringType t, Person a, int numOfCopies, double price) {
 Book b = ctor_Book;
 b.setBook(&b,t, a, numOfCopies, price);
 return b;
@@ -215,7 +218,7 @@ return ord;
 }
 
 
-Bookstore createBookstore(char* n) {
+Bookstore createBookstore(StringType n) {
 Bookstore bs = ctor_Bookstore;
 bs.name = n;
 bs.numOfBooks = 0;
@@ -230,7 +233,6 @@ orderId = 0;
 Address a = ctor_Address, a1 = ctor_Address;
 a = createAddress("Stadiou", 10, "Stadiou");
 Person author = ctor_Person;
-
 author = createPerson("Christos", "Papadimitriou", "cpap@gmail.com", 12345, a);
 Book b = ctor_Book;
 b = createBook("Computation Theory", author, 34.3, 100);
