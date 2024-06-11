@@ -322,6 +322,8 @@ comp:
     
        // reset the all_funcs string , to get new funcs on the next comp and dont rewrite the old ones.
        free(all_funcs);
+       free(all_funcs_names);
+       free(all_comp_object_members);
        all_funcs = NULL;
        all_funcs_names = NULL;
        all_comp_object_members = NULL;
@@ -347,15 +349,21 @@ comp_field:
             char *identifier_copy = strdup($1); // Create a copy to modify
             char *bracket_pos = strchr(identifier_copy, '['); // Find the bracket position
             if (bracket_pos != NULL) {  // Check if the identifier is an array
-                *bracket_pos = '\0'; // Truncate at the bracket to remove the size
+                char *size_str = strdup(bracket_pos + 1); // Copy the size part
+                char *end_bracket_pos = strchr(size_str, ']'); // Find the closing bracket
+                if (end_bracket_pos != NULL) {
+                    *end_bracket_pos = '\0'; // Truncate to get only the size
+                }
+                *bracket_pos = '\0'; // Truncate the identifier to remove the size
                 // Create the initializer for the array
-                object_name = template(".%s = {[0 ... %s - 1] = ctor_%s}", identifier_copy, bracket_pos + 1, $3);
+                object_name = template(".%s = {[0 ... %s - 1] = ctor_%s}", identifier_copy, size_str, $3);
+                free(size_str); // Free the allocated memory for size_str
             } else {
                 // Create the initializer for a regular member
                 object_name = template(".%s = ctor_%s", $1, $3);
             }
 
-            size_t size = all_comp_object_members ? strlen(all_comp_object_members) + strlen(object_name) + 1 : strlen(object_name) + 1;
+            size_t size = all_comp_object_members ? strlen(all_comp_object_members) + strlen(object_name) + 2 : strlen(object_name) + 1;
             all_comp_object_members = (char*)realloc(all_comp_object_members, size);
             if (all_comp_object_members) {
                 if (strlen(all_comp_object_members) > 0) {

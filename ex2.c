@@ -2,9 +2,6 @@
 #include "lambdalib.h"
 
 
-
-
-
 #define SELF struct Address *self
 
 typedef struct Address {
@@ -177,7 +174,7 @@ return total;
 
 }
 
-const Bookstore ctor_Bookstore = { .putOrder=putOrder,.addBook=addBook,.printBookStoreBooks=printBookStoreBooks,.calculateTotalOrdersIncome=calculateTotalOrdersIncome  , .listOfBooks = {[0 ... 100] - 1] = ctor_Book},.listOfOrders = {[0 ... 100] - 1] = ctor_Order} };
+const Bookstore ctor_Bookstore = { .putOrder=putOrder,.addBook=addBook,.printBookStoreBooks=printBookStoreBooks,.calculateTotalOrdersIncome=calculateTotalOrdersIncome  , .listOfBooks = {[0 ... 100 - 1] = ctor_Book},.listOfOrders = {[0 ... 100 - 1] = ctor_Order} };
 #undef SELF
 
 int orderId;
@@ -233,6 +230,7 @@ orderId = 0;
 Address a = ctor_Address, a1 = ctor_Address;
 a = createAddress("Stadiou", 10, "Stadiou");
 Person author = ctor_Person;
+
 author = createPerson("Christos", "Papadimitriou", "cpap@gmail.com", 12345, a);
 Book b = ctor_Book;
 b = createBook("Computation Theory", author, 34.3, 100);
