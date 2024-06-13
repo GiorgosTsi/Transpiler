@@ -143,14 +143,12 @@ int is_basic_data_type(const char *type) {
 %type <str> types
 %type <str> identifier
 %type <str> variable_declaration
-//%type <str> comp_declarations
 %type <str> comp
 %type <str> comp_body
 %type <str> comp_field
 %type <str> comp_identifiers
 %type <str> comp_function
 
-//%type <str> const_declarations
 %type <str> const
 %type <str> declaration
 %type <str> function
@@ -220,7 +218,7 @@ input:
     %empty 
     | declarations main_func { 
         if (yyerror_count == 0) {
-            printf("Expression evaluates to:\n");
+            printf("C equivalent code:\n");
             printf("************************\n");
             puts(c_prologue);
             printf("\n\n%s\n%s\n", $1, $2);
@@ -230,7 +228,7 @@ input:
     
     | main_func { 
         if (yyerror_count == 0) {
-            printf("Expression evaluates to:\n");
+            printf("C equivalent code:\n");
             printf("************************\n");
             puts(c_prologue);
             printf("\n\n%s\n", $1);
@@ -267,6 +265,8 @@ variable_declaration:
       $$ = template("%s %s;", $3, $1);
     //if it is a complex type declare it as: i.e Coordinates x = ctor_Coordinates ;
     else{ 
+      /* tokenize if there are multiple declarations in one line:*/
+
       char* token = strtok($1, ", ");
       char* final_str = strdup("");
       int first = 1;
@@ -483,11 +483,11 @@ const:
 /************************* Expressions Declaration *************************/ 
 
 expr:
-    identifier_expr { $$ = $1; }
-    | TK_STRING { $$ = $1; }
+    TK_STRING { $$ = $1; }
     | KW_TRUE {$$ = template("1");}
     | KW_FALSE {$$ = template("0");}    
     | DEL_LPAR expr DEL_RPAR { $$ = template("(%s)", $2); }
+    | identifier_expr { $$ = $1; }
     | arithmetic_expr {$$ = $1;}
     | relational_expr {$$ = $1;}
     | logical_statements {$$ = $1;}
@@ -608,12 +608,12 @@ for_statement:
 	  ;
 
 array_int_comprehension:
-  TK_IDENTIFIER AOP_COLONASSIGN DEL_LBRACKET expr KW_FOR TK_IDENTIFIER DEL_COLON TK_INTEGER DEL_RBRACKET DEL_COLON types DEL_SMCOLON {$$ = template("%s* %s = (%s*)malloc(%s*sizeof(%s));\nfor(%s %s = 0; %s < %s; ++%s) {\n %s[%s] = %s;\n}", $11, $1, $11, $8, $11, $11, $6, $6, $8, $6, $1, $6, $4);}
+  TK_IDENTIFIER AOP_COLONASSIGN DEL_LBRACKET expr KW_FOR TK_IDENTIFIER DEL_COLON expr DEL_RBRACKET DEL_COLON types DEL_SMCOLON {$$ = template("%s* %s = (%s*)malloc(%s*sizeof(%s));\nfor(%s %s = 0; %s < %s; ++%s) {\n %s[%s] = %s;\n}", $11, $1, $11, $8, $11, $11, $6, $6, $8, $6, $1, $6, $4);}
   ;
   
  
 array_comprehension:
-	TK_IDENTIFIER AOP_COLONASSIGN DEL_LBRACKET expr KW_FOR TK_IDENTIFIER DEL_COLON types KW_IN TK_IDENTIFIER KW_OF TK_INTEGER DEL_RBRACKET DEL_COLON types DEL_SMCOLON 
+	TK_IDENTIFIER AOP_COLONASSIGN DEL_LBRACKET expr KW_FOR TK_IDENTIFIER DEL_COLON types KW_IN TK_IDENTIFIER KW_OF expr DEL_RBRACKET DEL_COLON types DEL_SMCOLON 
 	{
 	char* replaced_expr = replace_str($4, $6, template("%s[%s_i]", $10, $10));
 	$$ = template("%s* %s = (%s*)malloc(%s*sizeof(%s));\nfor(int %s_i = 0; %s_i < %s; ++%s_i) {\n\t%s[%s_i] = %s;\n}", $15, $1, $15, $12, $15, $10, $10, $12, $10, $1, $10, replaced_expr);

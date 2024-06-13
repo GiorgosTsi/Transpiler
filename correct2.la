@@ -1,0 +1,79 @@
+@defmacro start 100
+@defmacro stop 1000 
+
+next_random:integer;
+
+def next()->integer:
+    next_random = (next_random * 1103515245 + 12345) % 2147483648;
+    if (next_random<0):
+        next_random = -next_random;
+    endif;
+    return next_random;
+enddef;
+
+-- Print contents of an array
+def printArray(a[]:integer, size:integer):
+    for i in [0:size]:
+        writeInteger(a[i]);
+        if (i==size-1):
+            continue;
+        endif;
+        writeStr(", ");
+    endfor;
+    writeStr("\n");
+enddef;
+
+
+def main():
+
+    const size = 100 : integer ;
+
+    writeStr("Current start:");
+    writeInteger(start);
+    writeStr("\n");
+
+    writeStr("Current stop:");
+    writeInteger(stop);
+    writeStr("\n");
+
+    @defmacro start 200
+    @defmacro stop 1500
+
+
+    writeStr("Current start:");
+    writeInteger(start);
+
+    writeStr("\nCurrent stop:");
+    writeInteger(stop);
+    writeStr("\n");
+
+    -- Create a random array:
+    a := [next() + next()* 2 / 2 for i:size] :integer;
+
+    writeStr("Random array generated: ");
+    printArray(a,size);
+    
+    -- Create an array of bounded values using comprehension
+    f := [x%stop for x:integer in a of size]: integer;
+
+    j : integer ;
+    j = 0;
+    while ( j < size):
+        if ( f[j] < start and f[j] >= 0 ):
+            f[j] += start ;
+        endif;
+
+        if ( f[j] < 0): -- maybe exists overflow
+            f[j] = start + next() % (stop - start);
+        endif;
+        
+        j = j + 1 ;
+    endwhile;
+
+    writeStr("Random bounded array generated: ");
+    printArray(f,size);
+
+   
+
+
+enddef;

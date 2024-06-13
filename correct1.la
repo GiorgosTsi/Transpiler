@@ -1,0 +1,110 @@
+-- Teacher struct
+comp Teacher :
+    #firstName: str;
+    #lastName: str;
+    #department: str;
+
+    -- setTeacher method
+    def setTeacher(firstName: str, lastName: str, department: str) :
+        #firstName = firstName;
+        #lastName = lastName;
+        #department = department;
+    enddef;
+
+    -- printTeacher method
+    def printTeacher() :
+        write("Teacher: %s %s, Department: %s\n", #firstName, #lastName, #department);
+    enddef;
+endcomp;
+
+-- Student struct
+comp Student :
+    #firstName: str;
+    #lastName: str;
+    #studentID: integer;
+    #major: str;
+
+    -- setStudent method
+    def setStudent(firstName: str, lastName: str, studentID: integer, major: str) :
+        #firstName = firstName;
+        #lastName = lastName;
+        #studentID = studentID;
+        #major = major;
+    enddef;
+
+    -- printStudent method
+    def printStudent() :
+        write("Student: %s %s, ID: %d, Major: %s\n", #firstName, #lastName, #studentID, #major);
+    enddef;
+
+endcomp;
+
+-- University struct
+comp University :
+    #name: str;
+    #location: str;
+    #teachers[10]: Teacher;
+    #students[50]: Student;
+    #numOfTeachers: integer;
+    #numOfStudents: integer;
+
+    -- setUniversity method
+    def setUniversity(name: str, location: str) :
+        #name = name;
+        #location = location;
+        #numOfTeachers = 0;
+        #numOfStudents = 0;
+    enddef;
+
+    -- addTeacher method
+    def addTeacher(t: Teacher) :
+        if (#numOfTeachers < 10) :
+            #teachers[#numOfTeachers] = t;
+            #numOfTeachers += 1;
+        endif;
+    enddef;
+
+    -- addStudent method
+    def addStudent(s: Student) :
+        if (#numOfStudents < 50) :
+            #students[#numOfStudents] = s;
+            #numOfStudents += 1;
+        endif;
+    enddef;
+
+    -- printUniversityInfo method
+    def printUniversityInfo() :
+        write("University: %s, Location: %s\n", #name, #location);
+        write("Teachers:\n");
+        for i in [0:#numOfTeachers] :
+            #teachers[i].printTeacher();
+        endfor;
+        write("Students:\n");
+        for i in [0:#numOfStudents] :
+            #students[i].printStudent();
+        endfor;
+    enddef;
+endcomp ;
+
+def main( ) :
+    u : University;
+    u.setUniversity("TUC", "Chania City");
+
+    t1 , t2 : Teacher;
+    t1.setTeacher("Alice", "Smith", "Computer Science");
+    u.addTeacher(t1);
+
+    t2.setTeacher("John", "Doe", "Mathematics");
+    u.addTeacher(t2);
+
+    s1 : Student ;
+    s1.setStudent("Bob", "Doe", 12345, "Computer Science");
+    u.addStudent(s1);
+
+    s2:Student ;
+    s2.setStudent("Daisy", "Maximus", 67890, "Mathematics");
+    u.addStudent(s2);
+
+    u.printUniversityInfo();
+
+enddef;
