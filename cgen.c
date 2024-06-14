@@ -69,7 +69,7 @@ void yyerror(char const *pat, ...) {
 
   // Print the current token that caused the error
   if (yytext) {
-    fprintf(stderr, " at '%s'", yytext);
+    fprintf(stderr, " at or around '%s'", yytext);
   }
 
   fprintf(stderr, "\n");

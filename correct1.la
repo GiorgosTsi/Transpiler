@@ -97,6 +97,14 @@ def main( ) :
     t2.setTeacher("John", "Doe", "Mathematics");
     u.addTeacher(t2);
 
+    -- Can handle also array of comp initialization:
+    s[2] : Student;
+    s[0].setStudent("Alex", "Doe", 12221, "Computer Science");
+    s[1].setStudent("Ariel", "Doe", 11111, "Physics");
+    u.addStudent(s[0]);
+    u.addStudent(s[1]);
+
+
     s1 : Student ;
     s1.setStudent("Bob", "Doe", 12345, "Computer Science");
     u.addStudent(s1);

@@ -1,28 +1,29 @@
-comp Coordinates:
-	#arr[5] , #x : integer;
-	
+comp Circle:
+	#x, #y: scalar;
+	#radius: scalar;
 	def area() -> scalar: return 3.14 * (#radius ** 2); enddef;
+	def perimeter() -> scalar: return 2 * 3.14 * #radius; enddef;
 	def move(dx: scalar, dy: scalar): #x=#x+dx; #y=#y+dx; enddef;
-	def printt(n: integer , s : str): writeStr("5"); enddef;
-
-endcomp;
-
-comp Example:
-	#x : integer;
-
-	def print(): writeStr(#x); enddef;
 endcomp;
 
 
 def main( ) :
-	x : Example;
-	z,h : Coordinates ;
+	a: Circle;
+	z,h : Circle ;
+	arr[5] : Circle ;
+	arr2[10] : Circle;
 
-    z.x = 5;
-    z.y.x = 8;
-    c[i].x = 8;
-    c[i].x.area(x,y);
-    x.printt();
-    h = x.y.z.area();
-	
+	arr3[3] , z2 , z3 : Circle;
+
+	z1 , arr4[3] , z4  : Circle;
+    z.radius = 5;
+	area : scalar;
+	area = z.area();
+	writeScalar(area);
+
+	arr[2].radius = 5;
+	area2 : scalar;
+	area2 = arr[2].area();
+	writeScalar(area);
+
 enddef;

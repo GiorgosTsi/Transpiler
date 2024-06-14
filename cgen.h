@@ -23,8 +23,6 @@ void ssclose(sstream* S);
 
 char *replaceChar(char* const source,  char toBeReplaced, char replacer);
 
-char* replace_str(const char *str, const char *old, const char *new);
-
 /*
         This function takes the same arguments as printf,
         but returns a new string with the output value in it.

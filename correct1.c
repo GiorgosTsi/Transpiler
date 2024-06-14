@@ -124,17 +124,35 @@ const University ctor_University = { .setUniversity=setUniversity,.addTeacher=ad
 #undef SELF
 
 int main () {
+
 University u = ctor_University;
+
 u.setUniversity(&u,"TUC", "Chania City");
-Teacher t1 = ctor_Teacher, t2 = ctor_Teacher;
+
+Teacher t1 = ctor_Teacher;
+
+Teacher t2 = ctor_Teacher;
+
 t1.setTeacher(&t1,"Alice", "Smith", "Computer Science");
 u.addTeacher(&u,t1);
 t2.setTeacher(&t2,"John", "Doe", "Mathematics");
 u.addTeacher(&u,t2);
+
+Student s[2];
+for (int i = 0; i < 2; i++) 
+{ s[i] = ctor_Student; }
+s[0].setStudent(&s[0],"Alex", "Doe", 12221, "Computer Science");
+s[1].setStudent(&s[1],"Ariel", "Doe", 11111, "Physics");
+u.addStudent(&u,s[0]);
+u.addStudent(&u,s[1]);
+
 Student s1 = ctor_Student;
+
 s1.setStudent(&s1,"Bob", "Doe", 12345, "Computer Science");
 u.addStudent(&u,s1);
+
 Student s2 = ctor_Student;
+
 s2.setStudent(&s2,"Daisy", "Maximus", 67890, "Mathematics");
 u.addStudent(&u,s2);
 u.printUniversityInfo(&u);

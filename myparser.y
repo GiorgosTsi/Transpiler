@@ -260,34 +260,51 @@ main_func:
 variable_declaration:
   identifier DEL_COLON types DEL_SMCOLON
    {
-    // if its a basic data type then declare it as normal : i.e int x;
-    if (is_basic_data_type($3)) 
+    // If it's a basic data type, declare it normally
+    if (is_basic_data_type($3)) {
       $$ = template("%s %s;", $3, $1);
-    //if it is a complex type declare it as: i.e Coordinates x = ctor_Coordinates ;
-    else{ 
-      /* tokenize if there are multiple declarations in one line:*/
 
+    // If it's a Comp type declare it by using the constructor : i.e Circle x = ctor_Circle;
+    } else {
+
+      /*Tokenize by ',' because there may be multiple declarations in the same line! */
       char* token = strtok($1, ", ");
       char* final_str = strdup("");
-      int first = 1;
 
       while (token != NULL) {
-        char* new_str = template("%s = ctor_%s", token, $3);
 
-        if (first) {
-            first = 0;
-            final_str = template("%s%s", final_str, new_str);
-        } else {
-            final_str = template("%s, %s", final_str, new_str);
+        /* If it is an array of composite types : */
+        char* bracket_pos = strchr(token, '['); // Find the bracket position
+        if (bracket_pos != NULL) {
+          // Handle array initialization
+          char* size_str = strdup(bracket_pos + 1); // Copy the size part
+          char* end_bracket_pos = strchr(size_str, ']'); // Find the closing bracket
+          if (end_bracket_pos != NULL) {
+              *end_bracket_pos = '\0'; // Truncate to get only the size
+          }
+          *bracket_pos = '\0'; // Truncate the identifier to remove the size
+
+          int size = atoi(size_str); // Convert size_str to integer
+          free(size_str);
+
+          char* loop_str = template("for (int i = 0; i < %d; i++) \n{ %s[i] = ctor_%s; }", size, token, $3);
+
+          final_str = template("%s\n%s %s[%d];\n%s", final_str, $3, token, size, loop_str);
+          
+          free(loop_str);
+
+        } 
+        else {
+          // Handle regular composite types initialization
+          char* new_str = template("%s %s = ctor_%s;\n", $3, token, $3);
+          final_str = template("%s\n%s", final_str, new_str);
+          free(new_str);
         }
 
-        free(new_str);
         token = strtok(NULL, ", ");
       }
 
-      char* final_result = template("%s %s;",$3, final_str );
-      free(final_str);
-      $$ = final_result;
+      $$ = final_str;
     }
    }
     
