@@ -179,19 +179,6 @@ int is_basic_data_type(const char *type) {
 
 
 // Precedence:
-
-%left OP_MINUS OP_PLUS 
-%left OP_MULT OP_DIV
-%left OP_MOD
-%right OP_POWER
-
-%left ROP_EQUALS
-%left ROP_NOTEQUALS
-%left ROP_LESS
-%left ROP_LESSEQUALS
-%left ROP_GREATER
-%left ROP_GREATEREQUALS
-
 %right AOP_ASSIGN
 %right AOP_PLUSASSIGN 
 %right AOP_MINASSIGN
@@ -201,15 +188,29 @@ int is_basic_data_type(const char *type) {
 %right AOP_COLONASSIGN
 %right AOP_ARROW
 
+%left KW_OR
+%left KW_AND
+%left KW_NOT
+
+%left ROP_EQUALS
+%left ROP_NOTEQUALS
+%left ROP_LESS
+%left ROP_LESSEQUALS
+%left ROP_GREATER
+%left ROP_GREATEREQUALS
+
+%left OP_MINUS OP_PLUS 
+%left OP_MULT OP_DIV
+%left OP_MOD  
+%right OP_POWER
+
+
 %left DEL_DOT
 %left DEL_LPAR
 %left DEL_RPAR
 %left DEL_LBRACKET
 %left DEL_RBRACKET
 
-%left KW_NOT
-%left KW_AND
-%left KW_OR
 
 %%
 /******************************************* RULES SECTION *******************************************/
