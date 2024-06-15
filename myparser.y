@@ -286,7 +286,7 @@ variable_declaration:
 
           int size = atoi(size_str); // Convert size_str to integer
           free(size_str);
-
+          
           char* loop_str = template("for (int i = 0; i < %d; i++) \n{ %s[i] = ctor_%s; }", size, token, $3);
 
           final_str = template("%s\n%s %s[%d];\n%s", final_str, $3, token, size, loop_str);
@@ -296,7 +296,13 @@ variable_declaration:
         } 
         else {
           // Handle regular composite types initialization
-          char* new_str = template("%s %s = ctor_%s;\n", $3, token, $3);
+          char * new_str = NULL;
+
+          if (strchr(token, '*') != NULL) // if its a pointer you dont need the ctor initialization!
+            new_str = template("%s %s;\n", $3, token);
+          else
+            new_str = template("%s %s = ctor_%s;\n", $3, token, $3);
+          
           final_str = template("%s\n%s", final_str, new_str);
           free(new_str);
         }

@@ -144,6 +144,8 @@ for (int i = 0; i < 2; i++)
 { s[i] = ctor_Student; }
 Student s2 = ctor_Student;
 
+Student *sp;
+
 s[0].setStudent(&s[0],"Alex", "Doe", 12221, "Computer Science");
 s[1].setStudent(&s[1],"Ariel", "Doe", 11111, "Physics");
 u.addStudent(&u,s[0]);
