@@ -35,7 +35,7 @@ This is a project made for **Computation Theory** 2024 Course in Technical Unive
     Use the Lambda Transpiler to convert your `.la` file to a C file.
 
     ```bash
-    ./mycomp < input.lambda > output.c
+    ./mycomp < input.la > output.c
     ```
 
 3. **Compile the C Code**

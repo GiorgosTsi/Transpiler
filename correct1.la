@@ -1,7 +1,6 @@
 -- Teacher struct
 comp Teacher :
-    #firstName: str;
-    #lastName: str;
+    #firstName , #lastName: str;
     #department: str;
 
     -- setTeacher method
@@ -98,18 +97,15 @@ def main( ) :
     u.addTeacher(t2);
 
     -- Can handle also array of comp initialization:
-    s[2] : Student;
+    s1 , s[2] , s2 : Student;
     s[0].setStudent("Alex", "Doe", 12221, "Computer Science");
     s[1].setStudent("Ariel", "Doe", 11111, "Physics");
     u.addStudent(s[0]);
     u.addStudent(s[1]);
 
-
-    s1 : Student ;
     s1.setStudent("Bob", "Doe", 12345, "Computer Science");
     u.addStudent(s1);
 
-    s2:Student ;
     s2.setStudent("Daisy", "Maximus", 67890, "Mathematics");
     u.addStudent(s2);
 

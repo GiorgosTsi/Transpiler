@@ -5,12 +5,13 @@
 	#include "myparser.tab.h"
 	
   #define MAX_MACRO 256
+  #define MAX_NAME_SIZE 512
 
 	int line_num = 1;
 	int macro_count = 0;
 	int macro_name_exists = -1;
 	char* macro_table[MAX_MACRO]; 
-	char macro_table_names[MAX_MACRO][32];
+	char macro_table_names[MAX_MACRO][MAX_NAME_SIZE];
    
   /* Function to get the macro value by giving the macro name id*/
   char* get_macro_value_by_macro_name(const char* identifier) {

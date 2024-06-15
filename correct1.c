@@ -8,8 +8,7 @@
 #define SELF struct Teacher *self
 
 typedef struct Teacher {
-StringType firstName;
-StringType lastName;
+StringType firstName, lastName;
 StringType department;
 void (*setTeacher)(SELF , StringType firstName, StringType lastName, StringType department);
 
@@ -138,21 +137,19 @@ u.addTeacher(&u,t1);
 t2.setTeacher(&t2,"John", "Doe", "Mathematics");
 u.addTeacher(&u,t2);
 
+Student s1 = ctor_Student;
+
 Student s[2];
 for (int i = 0; i < 2; i++) 
 { s[i] = ctor_Student; }
+Student s2 = ctor_Student;
+
 s[0].setStudent(&s[0],"Alex", "Doe", 12221, "Computer Science");
 s[1].setStudent(&s[1],"Ariel", "Doe", 11111, "Physics");
 u.addStudent(&u,s[0]);
 u.addStudent(&u,s[1]);
-
-Student s1 = ctor_Student;
-
 s1.setStudent(&s1,"Bob", "Doe", 12345, "Computer Science");
 u.addStudent(&u,s1);
-
-Student s2 = ctor_Student;
-
 s2.setStudent(&s2,"Daisy", "Maximus", 67890, "Mathematics");
 u.addStudent(&u,s2);
 u.printUniversityInfo(&u);
