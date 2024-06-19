@@ -10,6 +10,7 @@ endcomp;
 def main( ) :
 	a: Circle;
 	b[] : Circle;
+	c[][] : int;
 	x1 , x2[5] , x3[] : integer;
 	z,h : Circle ;
 	arr[5] : Circle ;

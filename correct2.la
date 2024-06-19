@@ -1,5 +1,6 @@
 @defmacro start 100
 @defmacro stop 1000 
+@defmacro whitespace "\n\n"
 
 next_random:integer;
 
@@ -30,28 +31,31 @@ def main():
 
     writeStr("Current start:");
     writeInteger(start);
-    writeStr("\n");
+    writeStr(whitespace);
 
     writeStr("Current stop:");
     writeInteger(stop);
-    writeStr("\n");
+    writeStr(whitespace);
 
     @defmacro start 200
-    @defmacro stop 1500
-
+    @defmacro stop (1500*2)
+    @defmacro whitespace "\n"
 
     writeStr("Current start:");
     writeInteger(start);
+    writeStr(whitespace);
 
     writeStr("\nCurrent stop:");
     writeInteger(stop);
-    writeStr("\n");
+    writeStr(whitespace);
 
     -- Create a random array:
     a := [next() + next()* 2 / 2 for i:size] :integer;
 
     writeStr("Random array generated: ");
     printArray(a,size);
+    
+    writeStr(whitespace);
     
     -- Create an array of bounded values using comprehension
     f := [x%stop for x:integer in a of size]: integer;

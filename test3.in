@@ -35,6 +35,7 @@ def main( ) :
 	arr2[] : scalar;
 	x2 ,arr[5] : integer;
 	x2 , arr[] : integer;
+	arr[] , x3 , arr2[5] , arr3[] : Circle;
 	arr[5] , x : integer;
 	x : integer ;
 	x : Example;

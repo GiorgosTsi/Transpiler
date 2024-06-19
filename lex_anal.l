@@ -39,7 +39,7 @@ DOUBLE_QUOTE                    "\""
 
 CONSTANT_STRING                 {DOUBLE_QUOTE}(([^\"\\]|\\[ntr\\"'])*){DOUBLE_QUOTE}
 
-MACRO_VALUE                     ([^ \n])+
+MACRO_VALUE                     ([^ \n])+                    
 
 /* Conditions  */
 %x single_line_comment
@@ -89,7 +89,8 @@ MACRO_VALUE                     ([^ \n])+
                                   if(macro_name_exists == -1) //if the macro is not previously defined,define it now.
                                     strcpy(macro_table_names[macro_count],yytext);      
                                 }
-                                
+
+<macro>[ \r\t]+                        /* skip whitespaces,tabs and carriage returns */                     
                                                  
 <macro>{MACRO_VALUE}            { 
                                   if(macro_name_exists == -1){
@@ -127,7 +128,7 @@ MACRO_VALUE                     ([^ \n])+
 
 {INTEGER}                       { printf("TOKEN TK_INTEGER:\t\t %s\n" ,yytext );			yylval.str = strdup(yytext);	return TK_INTEGER; }
 {REAL}                          { printf("TOKEN TK_REAL:\t\t %s\n" ,yytext ); 				yylval.str = strdup(yytext);	return TK_REAL; }
-{CONSTANT_STRING}               { printf("TOKEN TK_STRING:\t\t %s\n" ,yytext ); 	yylval.str = strdup(yytext);	return TK_STRING; }
+{CONSTANT_STRING}               { printf("TOKEN TK_STRING:\t\t %s\n" ,yytext ); 	    yylval.str = strdup(yytext);	return TK_STRING; }
 
 
 "+"                             {printf("TOKEN OP_PLUS:\t\t %s\n" ,yytext ); return OP_PLUS;}

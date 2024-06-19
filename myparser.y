@@ -202,6 +202,7 @@ int is_basic_data_type(const char *type) {
 %left OP_MINUS OP_PLUS 
 %left OP_MULT OP_DIV
 %left OP_MOD  
+
 %right OP_POWER
 
 
@@ -323,7 +324,7 @@ basic_data_type:
     | KW_BOOLEAN { $$ = template("%s", "int"); }
 	;
 
-types:
+types: // used for return types and for variable declaration.
 	basic_data_type 
   | TK_IDENTIFIER //used for comp types
 	;
@@ -560,7 +561,7 @@ logical_statements:
 /************************* Function Declaration *************************/ 
 
 function: 
-  KW_DEF TK_IDENTIFIER DEL_LPAR params DEL_RPAR DEL_COLON func_body KW_ENDDEF DEL_SMCOLON 								{$$ = template("\nvoid %s(%s) {\n%s\n}\n", $2, $4, $7);}
+  KW_DEF TK_IDENTIFIER DEL_LPAR params DEL_RPAR DEL_COLON func_body KW_ENDDEF DEL_SMCOLON 								    {$$ = template("\nvoid %s(%s) {\n%s\n}\n", $2, $4, $7);}
   | KW_DEF TK_IDENTIFIER DEL_LPAR params DEL_RPAR AOP_ARROW types DEL_COLON func_body KW_ENDDEF DEL_SMCOLON 	{$$ = template("\n%s %s(%s) {\n%s\n\n}\n", $7, $2, $4, $9);}
   ;
 
@@ -595,7 +596,8 @@ statements:
   |  return_statement
   |  break_statement
   |  continue_statement
-  |  function_statement DEL_SMCOLON { $$ = template("%s;", $1); };
+  |  function_statement DEL_SMCOLON { $$ = template("%s;", $1); } 
+  |  DEL_SMCOLON {$$ = template(";");}
 	;
 	
 statement_body:
@@ -661,8 +663,8 @@ return_statement:
 function_statement:
   TK_IDENTIFIER DEL_LPAR DEL_RPAR {$$ = template("%s()", $1);}
   | TK_IDENTIFIER DEL_LPAR function_arguments DEL_RPAR {$$ = template("%s(%s)", $1,$3);}
-  | identifier_expr DEL_DOT TK_IDENTIFIER DEL_LPAR DEL_RPAR {$$ = template("%s.%s(&%s)" , $1 , $3 ,$1); }
-  | identifier_expr DEL_DOT TK_IDENTIFIER DEL_LPAR function_arguments DEL_RPAR {$$ = template("%s.%s(&%s,%s)" , $1 , $3 ,$1, $5); }
+  | identifier_expr DEL_DOT TK_IDENTIFIER DEL_LPAR DEL_RPAR {$$ = template("%s.%s(&%s)" , $1 , $3 ,$1); } // used for calling comp functions
+  | identifier_expr DEL_DOT TK_IDENTIFIER DEL_LPAR function_arguments DEL_RPAR {$$ = template("%s.%s(&%s,%s)" , $1 , $3 ,$1, $5); } // used for calling comp functions
   ;
 
 function_arguments:

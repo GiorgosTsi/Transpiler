@@ -110,6 +110,7 @@ void setOrder(SELF, int orNum, Book b, int q, Address sh, int del)
 
 void printOrder(SELF)
 {
+    ;
 }
 
 const Order ctor_Order = {.setOrder = setOrder, .printOrder = printOrder, .book = ctor_Book, .shippingAddress = ctor_Address};

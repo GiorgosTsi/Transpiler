@@ -1,0 +1,6 @@
+@defmacro N 100
+
+def main():
+    writeInteger(N);
+
+enddef;

@@ -36,14 +36,15 @@ int main () {
 const int size = 100;
 writeStr("Current start:");
 writeInteger(100);
-writeStr("\n");
+writeStr("\n\n");
 writeStr("Current stop:");
 writeInteger(1000);
-writeStr("\n");
+writeStr("\n\n");
 writeStr("Current start:");
 writeInteger(200);
+writeStr("\n");
 writeStr("\nCurrent stop:");
-writeInteger(1500);
+writeInteger((1500 * 2));
 writeStr("\n");
 int* a = (int*)malloc(size*sizeof(int));
 for(int i = 0; i < size; ++i) {
@@ -51,9 +52,10 @@ for(int i = 0; i < size; ++i) {
 }
 writeStr("Random array generated: ");
 printArray(a, size);
+writeStr("\n");
 int* f = (int*)malloc(size*sizeof(int));
 for(int a_i = 0; a_i < size; ++a_i) {
-	f[a_i] = a[a_i] % 1500;
+	f[a_i] = a[a_i] % (1500 * 2);
 }
 int j;
 j = 0;
@@ -63,7 +65,7 @@ f[j] += 200;
 
 }
 if (f[j] < 0) {
-f[j] = 200 + next() % (1500 - 200);
+f[j] = 200 + next() % ((1500 * 2) - 200);
 
 }
 j = j + 1;

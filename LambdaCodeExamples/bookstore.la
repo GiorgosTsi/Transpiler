@@ -73,7 +73,7 @@ comp Order:
   enddef;
 
   def printOrder():
-
+    ;
   enddef;
 
 endcomp;
